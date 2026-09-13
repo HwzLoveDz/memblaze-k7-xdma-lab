@@ -1,0 +1,124 @@
+{
+  "schema_version": 2,
+  "project": "Memblaze K7 XDMA Lab",
+  "release": "0.1.0-lab",
+  "status": "pre-publication",
+  "publication_blockers": [
+    "exact-bitstream physical regression for the repository-local FPGA design",
+    "final original hardware wiring image and measured power-boundary review"
+  ],
+  "fpga_design": {
+    "repository_inputs_complete": true,
+    "part": "xc7k325tffg900-2",
+    "top": "memblaze_k7_xdma_wrapper",
+    "address_space": "0x00000000-0xffffffff",
+    "source_files": [
+      "fpga/build.tcl",
+      "fpga/create_project.tcl",
+      "fpga/bd/create_design.tcl",
+      "fpga/constraints/board.xdc",
+      "fpga/mig/memblaze_ddr3.prj",
+      "fpga/program_sram.tcl"
+    ],
+    "source_set_sha256": "21ced21f69c2f8265b6e61a31f1cd207b2e67c24a885ba5ff3cbddeae63812c0",
+    "source_sha256": {
+      "fpga/build.tcl": "9ed960c6335d58c26079941d5c0db1c996f771da5387215aacffc430b617414d",
+      "fpga/create_project.tcl": "50f2685492cf60c7de053b43f945649fba21958a88ceb37e3a3baaacdcc9c8de",
+      "fpga/bd/create_design.tcl": "a1103d29cbc4a73e0e682ae744f2e2751ecd683d0884a961faa9ea778e5593c8",
+      "fpga/constraints/board.xdc": "dc0022e01d580f783ac6b7f1c605eb8c757632f3a89b0de4c8fdecdb8c65fe77",
+      "fpga/mig/memblaze_ddr3.prj": "8bf11c595de08ffcfd7b8639e5b52b4eca25a141cd5a9274a6487018bc78c824",
+      "fpga/program_sram.tcl": "3fb7181763be6983576d3f573aea8fe375b100f2c8700d7a2604b97b8803eb2a"
+    },
+    "mig_configuration": {
+      "path": "fpga/mig/memblaze_ddr3.prj",
+      "generated_by": "AMD/Xilinx MIG software",
+      "terms": "subject to applicable AMD/Xilinx tool and IP terms",
+      "version_control_basis": "AMD UG949 2026.1, IP Versions and Revision Control"
+    },
+    "clean_build": {
+      "status": "pass",
+      "evidence_file": "evidence/validated_repository_clean_build_vivado_2026_1_sanitized.log",
+      "evidence_sha256": "697f0a5fc531a766c4a22415379324d7e004d7679552398a1dfc4bd85de4f093",
+      "vivado": "2026.1",
+      "drc_error_count": 0,
+      "implementation_drc_warning_count": 3,
+      "setup_wns_ns": 0.038,
+      "hold_whs_ns": 0.014,
+      "bus_skew_constraint_count": 10,
+      "bus_skew_violation_count": 0,
+      "minimum_bus_skew_slack_ns": 3.331,
+      "methodology_findings": {
+        "LUTAR-1_warning": 3,
+        "PDRC-190_warning": 12,
+        "XDCB-5_warning": 1,
+        "REQP-1959_advisory": 64,
+        "related_violations": 0
+      },
+      "bitstream_generated": true,
+      "bitstream_sha256": "287f0ff1e9a0bef58842d1769e782fe06ed16cf3019d8e65477ca7a688f5b1c5",
+      "bitstream_included": false
+    },
+    "physical_regression": {
+      "status": "pending",
+      "evidence_file": "evidence/validated_repository_exact_image_physical_regression_sanitized.log",
+      "evidence_sha256": "pending",
+      "required_gates": [
+        "JTAG volatile SRAM programming",
+        "PCIe enumeration",
+        "lspci -vv active BAR resource capture",
+        "Secure Boot enabled and signed XDMA module accepted",
+        "XDMA build, signing, load, and binding",
+        "basic DMA comparison",
+        "64 MiB comparison on both DMA channels",
+        "alias-4g",
+        "chunked-1g",
+        "four XDMA engine identifiers",
+        "concurrent dual-channel DMA comparison",
+        "full 4 GiB chunked comparison",
+        "PCIe and kernel-log stability, with AER recorded when exposed",
+        "cleanup"
+      ],
+      "pf0_bar0_resource_size_kib": "pending",
+      "tested_bitstream_sha256": "pending"
+    }
+  },
+  "physical_baseline": {
+    "date": "2026-09-14",
+    "setups": 1,
+    "host": "ASUS ROG Flow Z13",
+    "os": "Ubuntu 24.04.5 LTS Persistent Live USB",
+    "kernel": "7.0.0-31-generic",
+    "secure_boot": "enabled",
+    "endpoint": "10ee:7024",
+    "subsystem": "10ee:0007",
+    "result": "enumeration, driver binding, DMA comparison, extended DDR tests, and cleanup passed",
+    "scope_note": "This baseline predates the repository-local FPGA generator and does not qualify its newly generated bitstream."
+  },
+  "xdma_driver": {
+    "upstream": "https://github.com/Xilinx/dma_ip_drivers",
+    "commit": "b8466090b4e812e191da9e9305ffb11cb7ace768",
+    "archive": "vendor/xdma_linux_kernel_b8466090.tar.gz",
+    "sha256": "aba9086b051e2e29ee6a38a0b655857010e75400d7c410340334938586be23a2",
+    "reported_version": "2025.2.0"
+  },
+  "baseline_data_validation": {
+    "basic_round_trips": [
+      "4096 bytes at 0x00000000 on channel 0",
+      "1048576 bytes at 0x10000000 on channel 0",
+      "1048576 bytes at 0x20000000 on channel 1",
+      "67108864 bytes at 0x04000000 on channel 0"
+    ],
+    "alias_4g": "five distinct 1 MiB sentinels passed",
+    "chunked_1g": "sixteen 64 MiB chunks passed, covering the first 1 GiB",
+    "single_request_1g": "not validated; historical C2H ended with rc 137 and no compare result"
+  },
+  "excluded_from_publication": [
+    "generated bitstreams",
+    "generated AMD/Xilinx IP output products",
+    "DCP and netlists",
+    "private raw logs",
+    "MOK private keys and certificate identifiers",
+    "personal paths and device serials",
+    "Windows driver binaries"
+  ]
+}

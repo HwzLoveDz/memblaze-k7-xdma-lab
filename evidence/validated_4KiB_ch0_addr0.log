@@ -1,0 +1,24 @@
+SanitizedCopy=True
+Size=4096
+Address=0x0
+Channel=0
+4b77f20729cbab8e45504bcf0d0976618cd1aa84ef34fa30b15c89443375129e  $HOME/xdma-results/20260913_011019/tx_4096_addr_0x0_ch_0.bin
+dev /dev/xdma0_h2c_0, addr 0x0, aperture 0x0, size 0x1000, offset 0x0, count 1
+host buffer 0x2000 = 0x64f3a1651000
+#0: CLOCK_MONOTONIC 0.000087673 sec. write 4096 bytes
+** Avg time device /dev/xdma0_h2c_0, total time 87673 nsec, avg_time = 87673.000000, size = 4096, BW = 46.719059
+/dev/xdma0_h2c_0 ** Average BW = 4096, 46.719059
+H2C_RC=0
+dev /dev/xdma0_c2h_0, addr 0x0, aperture 0x0, size 0x1000, offset 0x0, count 1
+host buffer 0x2000, 0x584837803000.
+#0: CLOCK_MONOTONIC 0.000060904 sec. read 4096/4096 bytes
+** Avg time device /dev/xdma0_c2h_0, total time 60904 nsec, avg_time = 60904.000000, size = 4096, BW = 67.253380
+/dev/xdma0_c2h_0 ** Average BW = 4096, 67.253380
+C2H_RC=0
+4b77f20729cbab8e45504bcf0d0976618cd1aa84ef34fa30b15c89443375129e  $HOME/xdma-results/20260913_011019/tx_4096_addr_0x0_ch_0.bin
+4b77f20729cbab8e45504bcf0d0976618cd1aa84ef34fa30b15c89443375129e  $HOME/xdma-results/20260913_011019/rx_4096_addr_0x0_ch_0.bin
+CMP_RC=0
+--- New relevant kernel messages since this test began ---
+No new matching kernel messages.
+PASS: DMA round-trip data matched.
+SavedResult=$HOME/xdma-results/20260913_011019

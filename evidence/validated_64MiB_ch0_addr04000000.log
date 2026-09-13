@@ -1,0 +1,24 @@
+SanitizedCopy=True
+Size=67108864
+Address=0x04000000
+Channel=0
+f879cfe73bb183a1420d122c92b415dc4aa7c4019a9de6c50807c6e29d5d15ba  $HOME/xdma-results/20260913_011241/tx_67108864_addr_0x04000000_ch_0.bin
+dev /dev/xdma0_h2c_0, addr 0x4000000, aperture 0x0, size 0x4000000, offset 0x0, count 1
+host buffer 0x4001000 = 0x7bd27c860000
+#0: CLOCK_MONOTONIC 0.112375579 sec. write 67108864 bytes
+** Avg time device /dev/xdma0_h2c_0, total time 112375579 nsec, avg_time = 112375576.000000, size = 67108864, BW = 597.183716
+/dev/xdma0_h2c_0 ** Average BW = 67108864, 597.183716
+H2C_RC=0
+dev /dev/xdma0_c2h_0, addr 0x4000000, aperture 0x0, size 0x4000000, offset 0x0, count 1
+host buffer 0x4001000, 0x72b03b904000.
+#0: CLOCK_MONOTONIC 0.119124834 sec. read 67108864/67108864 bytes
+** Avg time device /dev/xdma0_c2h_0, total time 119124834 nsec, avg_time = 119124832.000000, size = 67108864, BW = 563.349060
+/dev/xdma0_c2h_0 ** Average BW = 67108864, 563.349060
+C2H_RC=0
+f879cfe73bb183a1420d122c92b415dc4aa7c4019a9de6c50807c6e29d5d15ba  $HOME/xdma-results/20260913_011241/tx_67108864_addr_0x04000000_ch_0.bin
+f879cfe73bb183a1420d122c92b415dc4aa7c4019a9de6c50807c6e29d5d15ba  $HOME/xdma-results/20260913_011241/rx_67108864_addr_0x04000000_ch_0.bin
+CMP_RC=0
+--- New relevant kernel messages since this test began ---
+No new matching kernel messages.
+PASS: DMA round-trip data matched.
+SavedResult=$HOME/xdma-results/20260913_011241

@@ -1,0 +1,25 @@
+name: static-checks
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Release publication checks
+        run: python3 tools/validate_repo.py --release
+      - name: Release checksum manifest
+        run: python3 tools/generate_sha256s.py --check
+      - name: Shell syntax
+        run: |
+          for script in linux/*.sh; do
+            bash -n "$script"
+          done
+      - name: Python syntax
+        run: python3 -m py_compile tools/*.py

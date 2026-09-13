@@ -1,0 +1,52 @@
+# Vivado generated state and outputs
+*.bit
+*.bin
+*.ltx
+*.dcp
+*.jou
+*.log
+*.str
+*.xpr
+*.xci
+*.bd
+*.wdb
+.Xil/
+*.cache/
+*.gen/
+*.hw/
+*.ip_user_files/
+*.runs/
+*.sim/
+*.srcs/
+
+# Sanitized evidence is intentionally versioned despite the general log rule.
+!evidence/*.log
+
+# Local evidence and credentials
+memblaze-xdma-results/
+memblaze-xdma-work/
+*.key
+*.priv
+*.pfx
+*.p12
+*.der
+*.cer
+*.pem
+*.crt
+*.csr
+*.lic
+*.ko
+*.o
+*.sys
+.env
+.env.*
+Module.symvers
+modules.order
+
+# Editors and operating systems
+__pycache__/
+*.py[cod]
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

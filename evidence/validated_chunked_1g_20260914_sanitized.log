@@ -1,0 +1,34 @@
+# Sanitized first-1-GiB full-coverage evidence
+# Source result ID: 20260914T014016.089811697Z
+# Mode: chunked-1g; channel 0; sixteen 64 MiB requests.
+# Procedure: write all sixteen distinct chunks first, then regenerate, read, hash, and cmp all chunks.
+
+VERIFY address=0x00000000 size=67108864 sha256=8c60636374cbf805f70de28fa7010fa1d496b6f7b4c37101d2b2659c5debdc2f h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x04000000 size=67108864 sha256=baab0d4408af15fb6e2917f9ed8b32d503daf9750f29a8c7e911d87ad45c9516 h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x08000000 size=67108864 sha256=198b88750409d0ddd067b1d70687e4b3c3df4c182d6edcf6c31ee5c9878b10a5 h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x0c000000 size=67108864 sha256=df1c47726d7f733fbf915e4a3028e58beb1d031f45808b193db861432c4d0c69 h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x10000000 size=67108864 sha256=3672bc848bb24c309546d3f786c17bedd41892c30d64e5712240942247367278 h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x14000000 size=67108864 sha256=189485d043681dfd44bfcb1c4e62b40ab286859067295248a6df81ccb755939b h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x18000000 size=67108864 sha256=87d3f6cb3c150e32574069cff431d12a0da04e00019b5335fe60bf39a31bf13b h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x1c000000 size=67108864 sha256=070c63b9cc66b69559a816942cdb91d09649dd47734ed800a976c6c2589ce340 h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x20000000 size=67108864 sha256=2f20e46531de4aa48c1d72fd173b4da09e09bcc1526d43bcbf3334e25b6a09ec h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x24000000 size=67108864 sha256=08c8263029d551d57dc058233fdb1a3b4cea5ba4b872940a5ef8075f37a827e1 h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x28000000 size=67108864 sha256=1d1fe89300266583cc24b558a2a4b0a2f4931c1c31e5bfedcccf0ae537de6622 h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x2c000000 size=67108864 sha256=2cf09343ac912f17e690d4c95bee42ea49b15c0074cabf895adefcd93738a327 h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x30000000 size=67108864 sha256=3a424b2003c5e202db22577332017031cc0aeedd8713ce7d7b84d6ae57b621bb h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x34000000 size=67108864 sha256=25c7b6f6d0b0983e5e8373c8ec48636639ac5fee9ba9fb91443ab7456c50b785 h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x38000000 size=67108864 sha256=fc047f55e915315bf0721162722987387ebfa8020778864726177b4028a179ad h2c_rc=0 c2h_rc=0 cmp_rc=0
+VERIFY address=0x3c000000 size=67108864 sha256=a19d433d21e068994fdf1da66f4710be73ea84043d05c878ee07050a518f5fe0 h2c_rc=0 c2h_rc=0 cmp_rc=0
+
+CHUNK_COUNT=16
+CHUNK_SIZE_BYTES=67108864
+TOTAL_UNIQUE_BYTES_VERIFIED=1073741824
+ADDRESS_RANGE=0x00000000-0x3fffffff
+NEW_RELEVANT_KERNEL_MESSAGES=none
+DMESG_BEFORE_AFTER_SHA256_IDENTICAL=yes
+PCIE_CONFIG_BEFORE_AFTER_SHA256_IDENTICAL=yes
+PCIE_TOPOLOGY_BEFORE_AFTER_SHA256_IDENTICAL=yes
+EXTENDED_DMA_DATA_COMPARE=PASS
+
+# Proven: every byte in the first 1 GiB was covered by one of the sixteen successful chunk round-trips.
+# Not proven: completion of one monolithic 1 GiB DMA request.

@@ -1,0 +1,19 @@
+* text=auto eol=lf
+*.sh text eol=lf
+*.tcl text eol=lf
+*.xdc text eol=lf
+*.prj text eol=lf
+*.v text eol=lf
+*.sv text eol=lf
+*.vhd text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.patch text eol=lf
+*.patch whitespace=-blank-at-eol,-blank-at-eof,-space-before-tab
+*.tar.gz binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.svg text eol=lf

@@ -1,0 +1,23 @@
+# Sanitized historical negative evidence; this is not part of the final successful run.
+# Source: analysis/xdma_bringup_2026-09-13/ubuntu_usb_evidence/roundtrips/20260913_011513_1GiB_ch0_addr0_failed.log
+
+SIZE_BYTES=1073741824
+ADDRESS=0x00000000
+CHANNEL=0
+TX_SHA256=9d1be1cbf900301f7c4be04ce1b20bea71d4faa0ce8f7a5842444c827ac6c475
+H2C_RC=0
+C2H_RC=137
+RX_SHA256=not_recorded
+CMP_RC=not_run
+DATA_RESULT=NOT_PROVEN
+
+WRAPPER_TIMEOUT_SECONDS=15
+WRAPPER_KILL_AFTER_SECONDS=2
+OBSERVED_SHELL_MESSAGE=process_was_killed
+OBSERVED_STACK_SYMBOLS=xdma_init_request,xdma_xfer_submit,char_sgdma_read_write,char_sgdma_write,page_fault_path
+
+# Direct conclusion: the H2C command returned success; the C2H command was killed and no comparison result exists.
+# RC=137 is consistent with SIGKILL after the wrapper timeout, but does not uniquely prove the signal source.
+# The filtered stack lacks the event header. It does not prove OOM, a driver defect, or FPGA DDR corruption.
+# Host-buffer/request allocation pressure and synchronous output to persistent USB remain hypotheses only.
+# A later 16 x 64 MiB run verified the first 1 GiB, but did not validate a single 1 GiB request.

@@ -1,0 +1,58 @@
+# Sanitized final-run evidence summary
+# Source: analysis/xdma_final_evidence_2026-09-14/raw/
+# Personal paths, USB identifiers, and MOK certificate identifiers omitted.
+
+RUN_UTC=2026-09-14T01:40:08Z
+OS=Ubuntu 24.04.5 LTS
+KERNEL=7.0.0-31-generic
+STORAGE_BOUNDARY=PASS
+PERSISTENT_LIVE_USB=PASS
+RUN_INPUT_PACKAGE=RC0_INTERNAL_WITH_PERSISTENT_HOME_HOTFIXES
+RC0_INPUT_PACKAGE_SHA256=PASS
+
+# Layer 1: PCIe enumeration
+PCI_ENUMERATION=PASS
+ENDPOINT_BDF=0000:09:00.0
+ENDPOINT_VID_DID=10ee:7024
+ENDPOINT_SUBSYSTEM=10ee:0007
+PROBE_BOUND_DRIVER=none
+
+# Build and Secure Boot
+XDMA_DRIVER_VERSION=2025.2.0
+STEP_BUILD_RC=0
+MODULE_VERMAGIC_MATCHED_RUNNING_KERNEL=yes
+SECURE_BOOT=enabled
+MODULE_WAS_SIGNED=yes
+KERNEL_ACCEPTED_MODULE=yes
+STEP_SECURE_BOOT_RC=0
+
+# Layer 2: driver load and binding
+STEP_LOAD_RC=0
+XDMA_DRIVER=PASS
+KERNEL_DRIVER_IN_USE=xdma
+XDMA_H2C_CHANNELS=2
+XDMA_C2H_CHANNELS=2
+REQUIRED_NODES=/dev/xdma0_control,/dev/xdma0_h2c_0,/dev/xdma0_h2c_1,/dev/xdma0_c2h_0,/dev/xdma0_c2h_1
+
+# Layer 3: DMA data comparison
+SMOKE_CASE_1=size:4096,address:0x00000000,channel:0,sha256:597f37baa1165b313782297662343bd2173e61b566074f4be2f1b487aef40b04,cmp_rc:0
+SMOKE_CASE_2=size:1048576,address:0x10000000,channel:0,sha256:a08c6286c59342f10f9f5cb44eba1ac517b90e020e092c0ec59c964319a57ecd,cmp_rc:0
+SMOKE_CASE_3=size:1048576,address:0x20000000,channel:1,sha256:b5a0c69ae34e576c899b09ba8c0a6cf5686a13deb4315e6d475eb78ed8815c12,cmp_rc:0
+STEP_SMOKE_RC=0
+DMA_DATA_COMPARE=PASS
+SMOKE_DMESG_BEFORE_AFTER_IDENTICAL=yes
+
+STEP_ALIAS_4G_RC=0
+EVIDENCE_ALIAS_4G=PASS
+STEP_CHUNKED_1G_RC=0
+EVIDENCE_CHUNKED_1G=PASS
+FINAL_DATA_TESTS=PASS
+
+# Cleanup is a separate gate
+CLEANUP_RC=0
+XDMA_UNLOADED=yes
+XDMA_DEVICE_NODES_DISAPPEARED=yes
+FINAL_EXPERIMENT_RC=0
+
+# Scope: enumeration, driver binding, and DMA comparison are independent claims.
+# The address and size coverage is recorded in the two extended-test evidence files.

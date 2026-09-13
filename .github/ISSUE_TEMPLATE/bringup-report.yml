@@ -1,0 +1,70 @@
+name: Bring-up report
+description: Report a board, PCIe, XDMA, or DMA result with reproducible evidence.
+title: "[bring-up] "
+labels:
+  - bring-up
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Remove personal paths, serials, private keys, and proprietary FPGA files before submitting.
+  - type: input
+    id: board
+    attributes:
+      label: Board and revision
+      placeholder: Memblaze/PBlaze3 board marking and visible revision
+    validations:
+      required: true
+  - type: input
+    id: host
+    attributes:
+      label: Host and PCIe path
+      placeholder: Host, enclosure/bridge, adapter, cable
+    validations:
+      required: true
+  - type: input
+    id: software
+    attributes:
+      label: OS, kernel, Vivado, and driver commit
+    validations:
+      required: true
+  - type: textarea
+    id: enumeration
+    attributes:
+      label: Enumeration evidence
+      description: Redacted lspci -Dnn, lspci -Dtv, and endpoint lspci -Dvvnn output.
+      render: shell
+    validations:
+      required: true
+  - type: dropdown
+    id: secure_boot
+    attributes:
+      label: Secure Boot state
+      options:
+        - Enabled, module accepted
+        - Enabled, module rejected
+        - Disabled
+        - Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: dma
+    attributes:
+      label: DMA evidence
+      description: Include size, address, channel, H2C/C2H RC, hashes, and compare result.
+      render: shell
+  - type: textarea
+    id: kernel
+    attributes:
+      label: New relevant kernel messages
+      render: shell
+  - type: dropdown
+    id: cleanup
+    attributes:
+      label: Cleanup result
+      options:
+        - CLEANUP_RC=0 and nodes disappeared
+        - Cleanup failed
+        - Not run
+    validations:
+      required: true

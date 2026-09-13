@@ -1,0 +1,37 @@
+diff --git a/XDMA/linux-kernel/xdma/Makefile b/XDMA/linux-kernel/xdma/Makefile
+index 4182204..143b0a3 100644
+--- a/XDMA/linux-kernel/xdma/Makefile
++++ b/XDMA/linux-kernel/xdma/Makefile
+@@ -16,18 +16,19 @@ endif
+ 
+ $(warning XVC_FLAGS: $(XVC_FLAGS).)
+ 
+-topdir := $(shell cd $(src)/.. && pwd)
++# Modified 2026-09-14 by the Memblaze K7 XDMA Lab project.
++# This Makefile modification remains under the upstream BSD-3-Clause terms.
+ 
+ TARGET_MODULE:=xdma
+ 
+-EXTRA_CFLAGS := -I$(topdir)/include $(XVC_FLAGS)
++ccflags-y := -I$(src)/../include $(XVC_FLAGS)
+ ifeq ($(DEBUG),1)
+-	EXTRA_CFLAGS += -D__LIBXDMA_DEBUG__
++	ccflags-y += -D__LIBXDMA_DEBUG__
+ endif
+ ifneq ($(config_bar_num),)
+-	EXTRA_CFLAGS += -DXDMA_CONFIG_BAR_NUM=$(config_bar_num)
++	ccflags-y += -DXDMA_CONFIG_BAR_NUM=$(config_bar_num)
+ endif
+-#EXTRA_CFLAGS += -DINTERNAL_TESTING
++#ccflags-y += -DINTERNAL_TESTING
+ 
+ ifneq ($(KERNELRELEASE),)
+ 	$(TARGET_MODULE)-objs := libxdma.o xdma_cdev.o cdev_ctrl.o cdev_events.o cdev_sgdma.o cdev_xvc.o cdev_bypass.o xdma_mod.o xdma_thread.o
+@@ -43,7 +44,6 @@ clean:
+ 	@/bin/rm -f *.ko modules.order *.mod.c *.o *.o.ur-safe .*.o.cmd
+ 
+ install: all
+-	@rm -f /lib/modules/5.15.0-67-generic/extra/xdma.ko
+ 	@echo "installing kernel modules to /lib/modules/$(shell uname -r)/xdma ..."
+ 	@mkdir -p -m 755 /lib/modules/$(shell uname -r)/xdma
+ 	@install -v -m 644 *.ko /lib/modules/$(shell uname -r)/xdma

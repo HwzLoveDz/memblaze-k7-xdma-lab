@@ -1,0 +1,28 @@
+# Sanitized 4 GiB address-sentinel evidence
+# Source result ID: 20260914T014014.599518466Z
+# Mode: alias-4g; channel 0; every DMA request was 1 MiB.
+# Procedure: write five distinct patterns first, then read and compare all five.
+
+WRITE address=0x00000000 size=1048576 sha256=7e0335a908ac70cffeffb18abbc9473d7d6f181d0e757ab00108ff2c030c8fbc h2c_rc=0
+VERIFY address=0x00000000 size=1048576 expected_sha256=7e0335a908ac70cffeffb18abbc9473d7d6f181d0e757ab00108ff2c030c8fbc actual_sha256=7e0335a908ac70cffeffb18abbc9473d7d6f181d0e757ab00108ff2c030c8fbc c2h_rc=0 cmp_rc=0
+
+WRITE address=0x40000000 size=1048576 sha256=06f92b45c96c4f4b512c345d6ec038ebaacfceb5e33f32cfc26acc509471a8aa h2c_rc=0
+VERIFY address=0x40000000 size=1048576 expected_sha256=06f92b45c96c4f4b512c345d6ec038ebaacfceb5e33f32cfc26acc509471a8aa actual_sha256=06f92b45c96c4f4b512c345d6ec038ebaacfceb5e33f32cfc26acc509471a8aa c2h_rc=0 cmp_rc=0
+
+WRITE address=0x80000000 size=1048576 sha256=cede6db4f4e4f4db4d7db5a8143a09342fdcd16ce2fe0034c6a976f819c65c31 h2c_rc=0
+VERIFY address=0x80000000 size=1048576 expected_sha256=cede6db4f4e4f4db4d7db5a8143a09342fdcd16ce2fe0034c6a976f819c65c31 actual_sha256=cede6db4f4e4f4db4d7db5a8143a09342fdcd16ce2fe0034c6a976f819c65c31 c2h_rc=0 cmp_rc=0
+
+WRITE address=0xc0000000 size=1048576 sha256=cdc6f88b9359c6b00485ea8922ab841d57febe2a4f82a5322f1b2f7f29217829 h2c_rc=0
+VERIFY address=0xc0000000 size=1048576 expected_sha256=cdc6f88b9359c6b00485ea8922ab841d57febe2a4f82a5322f1b2f7f29217829 actual_sha256=cdc6f88b9359c6b00485ea8922ab841d57febe2a4f82a5322f1b2f7f29217829 c2h_rc=0 cmp_rc=0
+
+WRITE address=0xfff00000 size=1048576 sha256=de85a026a6c95fc8c5c34d7047c15b698f7854b59918d75ef5a5df81c118c41b h2c_rc=0
+VERIFY address=0xfff00000 size=1048576 expected_sha256=de85a026a6c95fc8c5c34d7047c15b698f7854b59918d75ef5a5df81c118c41b actual_sha256=de85a026a6c95fc8c5c34d7047c15b698f7854b59918d75ef5a5df81c118c41b c2h_rc=0 cmp_rc=0
+
+NEW_RELEVANT_KERNEL_MESSAGES=none
+DMESG_BEFORE_AFTER_SHA256_IDENTICAL=yes
+PCIE_CONFIG_BEFORE_AFTER_SHA256_IDENTICAL=yes
+PCIE_TOPOLOGY_BEFORE_AFTER_SHA256_IDENTICAL=yes
+EXTENDED_DMA_DATA_COMPARE=PASS
+
+# Proven: the five tested 1 MiB windows retained independent patterns.
+# Not proven: a byte-for-byte scan of the entire 4 GiB address range.

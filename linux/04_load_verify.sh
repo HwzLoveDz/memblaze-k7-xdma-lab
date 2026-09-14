@@ -6,6 +6,8 @@ set -Eeuo pipefail
 export LC_ALL=C
 umask 077
 
+readonly script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly dmesg_helper="$script_dir/lib/dmesg_capture.sh"
 readonly expected_id="10ee:7024"
 readonly build_tag="b8466090-aba9086b051e"
 readonly kernel_release="$(uname -r)"
@@ -27,7 +29,7 @@ stop() {
     exit 1
 }
 
-for cmd in awk basename cat cmp date dmesg grep head insmod lspci mv readlink rm rmmod sha256sum tail tee udevadm uname wc; do
+for cmd in awk basename cat cmp date dirname dmesg grep head insmod lspci mv readlink rm rmmod sha256sum tail tee udevadm uname wc; do
     command -v "$cmd" >/dev/null 2>&1 || stop "missing command: $cmd"
 done
 
@@ -37,6 +39,9 @@ else
     command -v sudo >/dev/null 2>&1 || stop "sudo is required to load and verify the module"
     sudo_cmd=(sudo)
 fi
+[[ -r "$dmesg_helper" ]] || stop "kernel-log helper is missing: $dmesg_helper"
+# shellcheck source=linux/lib/dmesg_capture.sh
+source "$dmesg_helper" || stop "kernel-log helper could not be loaded"
 
 mapfile -t bdfs < <(lspci -Dnn -d "$expected_id" | awk '{print $1}')
 (( ${#bdfs[@]} == 1 )) \
@@ -77,12 +82,23 @@ printf '\n=== Endpoint before load ===\n'
 "${sudo_cmd[@]}" lspci -Dvvnnk -s "$bdf"
 readonly dmesg_before_file="$result_dir/dmesg_before_load.txt"
 readonly dmesg_after_file="$result_dir/dmesg_after_load.txt"
-"${sudo_cmd[@]}" dmesg --time-format=raw > "$dmesg_before_file"
+readonly dmesg_before_diagnostics="$result_dir/dmesg_before_load_capture.log"
+readonly dmesg_after_diagnostics="$result_dir/dmesg_after_load_capture.log"
+if ! memblaze_select_kernel_log_file "$dmesg_before_file" "$dmesg_before_diagnostics"; then
+    cat "$dmesg_before_diagnostics" >&2
+    stop "the pre-load kernel log could not be read from dmesg or the current-boot kernel journal"
+fi
+printf 'KERNEL_LOG_BACKEND=%s\n' "$MEMBLAZE_KERNEL_LOG_BACKEND"
+cat "$dmesg_before_diagnostics"
 readonly dmesg_lines_before="$(wc -l < "$dmesg_before_file")"
 loaded_by_script=0
 
 show_new_kernel_messages() {
-    "${sudo_cmd[@]}" dmesg --time-format=raw > "$dmesg_after_file"
+    if ! memblaze_capture_kernel_log_file "$dmesg_after_file" "$dmesg_after_diagnostics"; then
+        cat "$dmesg_after_diagnostics" >&2
+        return 3
+    fi
+    cat "$dmesg_after_diagnostics"
     local dmesg_lines_after
     dmesg_lines_after="$(wc -l < "$dmesg_after_file")"
     if (( dmesg_lines_before > 0 )); then

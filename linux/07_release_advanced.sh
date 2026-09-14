@@ -11,6 +11,9 @@ set -Eeuo pipefail
 export LC_ALL=C
 umask 077
 
+readonly script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly dmesg_helper="$script_dir/lib/dmesg_capture.sh"
+
 usage() {
     cat <<'EOF'
 Usage:
@@ -55,6 +58,8 @@ readonly log_file="$result_dir/07_release_advanced.log"
 readonly manifest_file="$result_dir/full_4g_pattern_manifest.txt"
 readonly dmesg_before_file="$result_dir/dmesg_before_advanced.txt"
 readonly dmesg_after_file="$result_dir/dmesg_after_advanced.txt"
+readonly dmesg_before_diagnostics="$result_dir/dmesg_before_advanced_capture.log"
+readonly dmesg_after_diagnostics="$result_dir/dmesg_after_advanced_capture.log"
 readonly pcie_before_file="$result_dir/pcie_path_before_advanced.txt"
 readonly pcie_after_file="$result_dir/pcie_path_after_advanced.txt"
 readonly pcie_status_before_file="$result_dir/pcie_path_status_before_advanced.txt"
@@ -78,7 +83,7 @@ stop() {
     exit 1
 }
 
-for cmd in awk basename cat cmp cut date df diff dmesg grep head lspci mktemp \
+for cmd in awk basename cat cmp cut date df diff dirname dmesg grep head lspci mktemp \
     openssl readlink rm sha256sum tail tee timeout uname wc; do
     command -v "$cmd" >/dev/null 2>&1 || stop "missing command: $cmd"
 done
@@ -91,6 +96,9 @@ else
     sudo_cmd=(sudo)
     sudo -v || stop "sudo authentication failed"
 fi
+[[ -r "$dmesg_helper" ]] || stop "kernel-log helper is missing: $dmesg_helper"
+# shellcheck source=linux/lib/dmesg_capture.sh
+source "$dmesg_helper" || stop "kernel-log helper could not be loaded"
 
 mapfile -t bdfs < <(lspci -Dnn -d "$expected_id" | awk '{print $1}')
 (( ${#bdfs[@]} == 1 )) \
@@ -218,7 +226,12 @@ capture_after() {
         extract_pcie_status "$pcie_after_file" "$pcie_status_after_file"
     fi
     lspci -Dtv > "$topology_after_file" || topology_rc=$?
-    "${sudo_cmd[@]}" dmesg --time-format=raw > "$dmesg_after_file" || dmesg_rc=$?
+    if memblaze_capture_kernel_log_file "$dmesg_after_file" "$dmesg_after_diagnostics"; then
+        dmesg_rc=0
+    else
+        dmesg_rc=$?
+    fi
+    cat "$dmesg_after_diagnostics"
     after_captured=1
     printf 'AfterCaptureRC=pcie:%s,topology:%s,dmesg:%s\n' \
         "$pcie_rc" "$topology_rc" "$dmesg_rc"
@@ -261,7 +274,12 @@ capture_pcie_path "$pcie_before_file" \
     || stop "could not capture the endpoint PCIe path before testing"
 extract_pcie_status "$pcie_before_file" "$pcie_status_before_file"
 lspci -Dtv > "$topology_before_file"
-"${sudo_cmd[@]}" dmesg --time-format=raw > "$dmesg_before_file"
+if ! memblaze_select_kernel_log_file "$dmesg_before_file" "$dmesg_before_diagnostics"; then
+    cat "$dmesg_before_diagnostics" >&2
+    stop "the pre-test kernel log could not be read from dmesg or the current-boot kernel journal"
+fi
+printf 'KERNEL_LOG_BACKEND=%s\n' "$MEMBLAZE_KERNEL_LOG_BACKEND"
+cat "$dmesg_before_diagnostics"
 readonly dmesg_lines_before="$(wc -l < "$dmesg_before_file")"
 capture_started=1
 

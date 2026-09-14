@@ -24,6 +24,7 @@ exact-bitstream physical regression.
 | `validated_chunked_1g_20260914_sanitized.log` | first 1 GiB, 16 × 64 MiB coverage |
 | `validated_final_run_20260914_sanitized.log` | final gate summary |
 | `historical_single_request_1g_failure_sanitized.log` | bounded historical negative result |
+| `failed_exact_image_preflight_20260915_sanitized.log` | exact-image launcher compatibility failure before PCIe/DMA, plus the bounded corrective action |
 
 ## Reading the evidence
 
@@ -35,6 +36,11 @@ write/read comparison matched. None of these markers substitutes for another.
 The historical 1 GiB log intentionally remains in the set. It shows why the
 public workflow limits individual requests to 64 MiB and avoids claiming that
 a monolithic 1 GiB request passed.
+
+The 2026-09-15 preflight failure is also retained because it proves why target
+runtime checks are required in addition to source-text validation. That run
+did not test enumeration, driver loading, DMA, or DDR; its transport evidence
+only proves the storage boundary and successful failure-log export.
 
 For the pending repository-image physical regression, confirm that the clean
 build's exact bitstream SHA-256 was used for JTAG. Source/build, JTAG,

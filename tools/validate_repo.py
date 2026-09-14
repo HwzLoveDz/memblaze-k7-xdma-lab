@@ -69,6 +69,7 @@ REQUIRED = {
     "linux/07_release_advanced.sh",
     "linux/run_exact_image_regression.sh",
     "linux/99_cleanup.sh",
+    "linux/lib/dmesg_capture.sh",
     "linux/patches/0001-portable-kbuild.patch",
     "fpga/build.tcl",
     "fpga/create_project.tcl",
@@ -78,6 +79,7 @@ REQUIRED = {
     "fpga/README.md",
     "fpga/program_sram.tcl",
     "tools/generate_sha256s.py",
+    "tools/test_dmesg_capture.sh",
     "vendor/xdma_linux_kernel_b8466090.tar.gz",
     "vendor/xdma_linux_kernel_b8466090.sha256",
     "LICENSES/GPL-2.0.txt",
@@ -910,6 +912,43 @@ def check_release_evidence(
 
 
 def check_kernel_log_guards(errors: list[str]) -> None:
+    helper_path = ROOT / "linux" / "lib" / "dmesg_capture.sh"
+    if helper_path.is_file():
+        helper_text = helper_path.read_text(encoding="utf-8")
+        for required in (
+            '"${sudo_cmd[@]}" dmesg',
+            "journalctl --dmesg --boot=0",
+            "--output=short-monotonic",
+            "MEMBLAZE_KERNEL_LOG_BACKEND",
+            "memblaze_select_kernel_log_text",
+            "memblaze_select_kernel_log_file",
+            "memblaze_capture_kernel_log_text",
+            "memblaze_capture_kernel_log_file",
+            "KERNEL_LOG_DMESG_ATTEMPT_RC=",
+            "KERNEL_LOG_JOURNAL_ATTEMPT_RC=",
+        ):
+            if required not in helper_text:
+                errors.append(
+                    "linux/lib/dmesg_capture.sh lacks kernel-log fallback guard: "
+                    f"{required}"
+                )
+
+    helper_test_path = ROOT / "tools" / "test_dmesg_capture.sh"
+    if helper_test_path.is_file():
+        helper_test_text = helper_test_path.read_text(encoding="utf-8")
+        for required in (
+            "unsupported dmesg --time-format=raw was reintroduced",
+            "fixed dmesg backend",
+            "fixed journal backend",
+            "dmesg failure stderr",
+            "failed journal stderr",
+        ):
+            if required not in helper_test_text:
+                errors.append(
+                    "tools/test_dmesg_capture.sh lacks runtime-contract case: "
+                    f"{required}"
+                )
+
     probe_path = ROOT / "linux" / "01_probe.sh"
     if probe_path.is_file():
         probe_text = probe_path.read_text(encoding="utf-8")
@@ -917,6 +956,8 @@ def check_kernel_log_guards(errors: list[str]) -> None:
             'resource_file="/sys/bus/pci/devices/$bdf/resource"',
             "LSPCI_VERBOSE=CAPTURED",
             "PF0_BAR0_RESOURCE_SIZE_KIB=",
+            'source "$dmesg_helper"',
+            "memblaze_select_kernel_log_file",
         ):
             if required not in probe_text:
                 errors.append(f"linux/01_probe.sh lacks BAR evidence guard: {required}")
@@ -931,7 +972,9 @@ def check_kernel_log_guards(errors: list[str]) -> None:
             continue
         text = path.read_text(encoding="utf-8")
         for required in (
-            "dmesg --time-format=raw",
+            'source "$dmesg_helper"',
+            "memblaze_select_kernel_log_file",
+            "memblaze_capture_kernel_log_file",
             'cmp --silent - "$dmesg_before_file"',
             "KernelLogPrefix=stable",
         ):
@@ -965,6 +1008,7 @@ def check_kernel_log_guards(errors: list[str]) -> None:
             "PROGRAM.IS_SUPPORTED=1",
             "PROGRAM.FILE",
             "PROGRAM.HW_BITSTREAM",
+            'run_step KERNEL_LOG_CONTRACT bash "$kernel_log_contract"',
             'run_step PROBE bash "$script_dir/01_probe.sh"',
             'run_step BUILD bash "$script_dir/02_build_driver.sh"',
             'run_step SECURE_BOOT bash "$script_dir/03_secure_boot_status.sh"',
@@ -979,7 +1023,20 @@ def check_kernel_log_guards(errors: list[str]) -> None:
             "AER_STATUS_CAPTURED=",
             "AER_STATUS_REASON=",
             "PCIE_PATH_STATUS_STABLE=yes",
-            "for (( attempt=0; attempt<50; attempt++ ))",
+            "EARLY_TOOLCHAIN_AND_MOK_PREFLIGHT=PASS",
+            '[[ "$(uname -m)" == "x86_64" ]]',
+            '[[ -e "$kernel_build_dir/Makefile" ]]',
+            '[[ -x "$kernel_sign_file" ]]',
+            'mok_private_owner_mode="$(sudo stat',
+            "certificate_public_key_sha=",
+            "private_public_key_sha=",
+            'mokutil --test-key "$mok_certificate"',
+            "memblaze_select_kernel_log_text",
+            "memblaze_capture_kernel_log_text",
+            "memblaze_capture_kernel_log_file",
+            "for (( attempt=0; attempt<log_flush_poll_attempts; attempt++ ))",
+            "readonly log_flush_poll_attempts=600",
+            "LOG_FLUSH_TIMEOUT:",
             "trap finish_workflow EXIT",
             'keepalive_sleep_pid=""',
             "trap stop_keepalive EXIT INT TERM",

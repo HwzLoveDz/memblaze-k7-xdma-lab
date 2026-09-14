@@ -74,5 +74,12 @@
 - `findmnt -M /cow` 是错的：`/cow` 是根 overlay 的 source，应使用
   `findmnt -T /` 查看根挂载。
 - `df -P` 与 `--output` 互斥；使用 `df -B1 --output=avail`。
+- Ubuntu 24.04 的 util-linux 2.39.3 不接受 `dmesg --time-format=raw`。这次
+  精确映像回归因此在 PCIe 枚举和任何 FPGA DDR 写入之前退出。脚本现在先调用
+  无附加格式参数的 `dmesg`，只有读取本身失败时才退回当前启动的 kernel
+  journal，并把两个后端的退出码和错误输出都写入证据。
+- 外层脚本不能用 `pipeline || true` 掩盖证据采集命令失败；内层也不能只把
+  stderr 留在变量里再给出笼统的 STOP。发布前的自动检查应真实执行兼容性
+  合约，而不只是搜索脚本文本。
 - 证据采集失败也必须保留原退出码并做 best-effort 收尾。
 - 清理脚本不能在节点仍存在时删除 ownership marker。

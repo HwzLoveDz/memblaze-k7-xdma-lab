@@ -6,6 +6,8 @@ set -Eeuo pipefail
 export LC_ALL=C
 umask 077
 
+readonly script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly dmesg_helper="$script_dir/lib/dmesg_capture.sh"
 readonly expected_id="10ee:7024"
 readonly expected_subsystem_vendor="0x10ee"
 readonly expected_subsystem_device="0x0007"
@@ -101,7 +103,7 @@ stop() {
     exit 1
 }
 
-for cmd in awk basename cmp date dmesg grep head lspci readlink sha256sum tail tee timeout uname wc; do
+for cmd in awk basename cat cmp date dirname dmesg grep head lspci readlink sha256sum tail tee timeout uname wc; do
     command -v "$cmd" >/dev/null 2>&1 || stop "missing command: $cmd"
 done
 
@@ -111,6 +113,9 @@ else
     command -v sudo >/dev/null 2>&1 || stop "sudo is required for XDMA character-device access and kernel-log evidence"
     sudo_cmd=(sudo)
 fi
+[[ -r "$dmesg_helper" ]] || stop "kernel-log helper is missing: $dmesg_helper"
+# shellcheck source=linux/lib/dmesg_capture.sh
+source "$dmesg_helper" || stop "kernel-log helper could not be loaded"
 
 mapfile -t bdfs < <(lspci -Dnn -d "$expected_id" | awk '{print $1}')
 (( ${#bdfs[@]} == 1 )) \
@@ -163,7 +168,14 @@ printf 'DDRWriteConfirmation=--confirm-ddr-write\n'
 
 readonly dmesg_before_file="$result_dir/dmesg_before_smoke.txt"
 readonly dmesg_after_file="$result_dir/dmesg_after_smoke.txt"
-"${sudo_cmd[@]}" dmesg --time-format=raw > "$dmesg_before_file"
+readonly dmesg_before_diagnostics="$result_dir/dmesg_before_smoke_capture.log"
+readonly dmesg_after_diagnostics="$result_dir/dmesg_after_smoke_capture.log"
+if ! memblaze_select_kernel_log_file "$dmesg_before_file" "$dmesg_before_diagnostics"; then
+    cat "$dmesg_before_diagnostics" >&2
+    stop "the pre-DMA kernel log could not be read from dmesg or the current-boot kernel journal"
+fi
+printf 'KERNEL_LOG_BACKEND=%s\n' "$MEMBLAZE_KERNEL_LOG_BACKEND"
+cat "$dmesg_before_diagnostics"
 readonly dmesg_lines_before="$(wc -l < "$dmesg_before_file")"
 
 run_roundtrip() {
@@ -231,7 +243,11 @@ else
 fi
 
 printf '\n=== New relevant kernel messages ===\n'
-"${sudo_cmd[@]}" dmesg --time-format=raw > "$dmesg_after_file"
+if ! memblaze_capture_kernel_log_file "$dmesg_after_file" "$dmesg_after_diagnostics"; then
+    cat "$dmesg_after_diagnostics" >&2
+    stop "the post-DMA kernel log could not be read from the selected backend"
+fi
+cat "$dmesg_after_diagnostics"
 dmesg_lines_after="$(wc -l < "$dmesg_after_file")"
 if (( dmesg_lines_before > 0 )); then
     if (( dmesg_lines_after < dmesg_lines_before )) \

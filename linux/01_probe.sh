@@ -6,6 +6,8 @@ set -Eeuo pipefail
 export LC_ALL=C
 umask 077
 
+readonly script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly dmesg_helper="$script_dir/lib/dmesg_capture.sh"
 readonly expected_id="10ee:7024"
 readonly results_root="${HOME:?HOME is not set}/memblaze-xdma-results"
 readonly utc_stamp="$(date -u +%Y%m%dT%H%M%S.%NZ)"
@@ -25,7 +27,7 @@ section() {
     printf '\n=== %s ===\n' "$1"
 }
 
-for cmd in awk basename cat date grep lspci readlink tail tee uname; do
+for cmd in awk basename cat date dirname dmesg grep lspci readlink tail tee uname; do
     command -v "$cmd" >/dev/null 2>&1 || stop "missing command: $cmd"
 done
 
@@ -35,6 +37,9 @@ else
     command -v sudo >/dev/null 2>&1 || stop "sudo is required for complete read-only PCIe and kernel-log evidence"
     sudo_cmd=(sudo)
 fi
+[[ -r "$dmesg_helper" ]] || stop "kernel-log helper is missing: $dmesg_helper"
+# shellcheck source=linux/lib/dmesg_capture.sh
+source "$dmesg_helper" || stop "kernel-log helper could not be loaded"
 
 section "Run identity"
 printf 'UTC=%s\n' "$(date -u +%FT%TZ)"
@@ -104,9 +109,16 @@ else
 fi
 
 section "Relevant kernel log"
-"${sudo_cmd[@]}" dmesg -T \
-    | grep -Ei 'pcie|thunderbolt|usb4|xilinx|xdma|aer|iommu|10ee|7024' \
-    | tail -n 300 || true
+readonly dmesg_file="$result_dir/dmesg_probe.txt"
+readonly dmesg_diagnostics_file="$result_dir/dmesg_probe_capture.log"
+if ! memblaze_select_kernel_log_file "$dmesg_file" "$dmesg_diagnostics_file"; then
+    cat "$dmesg_diagnostics_file" >&2
+    stop "the kernel log could not be read from dmesg or the current-boot kernel journal"
+fi
+printf 'KERNEL_LOG_BACKEND=%s\n' "$MEMBLAZE_KERNEL_LOG_BACKEND"
+cat "$dmesg_diagnostics_file"
+grep -Ei 'pcie|thunderbolt|usb4|xilinx|xdma|aer|iommu|10ee|7024' \
+    "$dmesg_file" | tail -n 300 || true
 
 section "Result"
 printf 'PASS: exactly one %s endpoint is enumerated.\n' "$expected_id"

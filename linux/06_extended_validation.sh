@@ -10,6 +10,9 @@ set -Eeuo pipefail
 export LC_ALL=C
 umask 077
 
+readonly script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly dmesg_helper="$script_dir/lib/dmesg_capture.sh"
+
 usage() {
     cat <<'EOF'
 Usage:
@@ -64,6 +67,8 @@ readonly log_file="$result_dir/06_extended_validation.log"
 readonly manifest_file="$result_dir/pattern_manifest.txt"
 readonly dmesg_before_file="$result_dir/dmesg_before_extended.txt"
 readonly dmesg_after_file="$result_dir/dmesg_after_extended.txt"
+readonly dmesg_before_diagnostics="$result_dir/dmesg_before_extended_capture.log"
+readonly dmesg_after_diagnostics="$result_dir/dmesg_after_extended_capture.log"
 readonly pcie_before_file="$result_dir/pcie_before_extended.txt"
 readonly pcie_after_file="$result_dir/pcie_after_extended.txt"
 readonly topology_before_file="$result_dir/pcie_topology_before.txt"
@@ -78,7 +83,7 @@ stop() {
     exit 1
 }
 
-for cmd in awk basename cmp cut date df dmesg grep head lspci mktemp openssl readlink rm sha256sum tail tee timeout uname wc; do
+for cmd in awk basename cat cmp cut date df dirname dmesg grep head lspci mktemp openssl readlink rm sha256sum tail tee timeout uname wc; do
     command -v "$cmd" >/dev/null 2>&1 || stop "missing command: $cmd"
 done
 
@@ -88,6 +93,9 @@ else
     command -v sudo >/dev/null 2>&1 || stop "sudo is required for XDMA access and complete evidence"
     sudo_cmd=(sudo)
 fi
+[[ -r "$dmesg_helper" ]] || stop "kernel-log helper is missing: $dmesg_helper"
+# shellcheck source=linux/lib/dmesg_capture.sh
+source "$dmesg_helper" || stop "kernel-log helper could not be loaded"
 
 mapfile -t bdfs < <(lspci -Dnn -d "$expected_id" | awk '{print $1}')
 (( ${#bdfs[@]} == 1 )) || stop "expected exactly one $expected_id endpoint; found ${#bdfs[@]}"
@@ -165,7 +173,12 @@ capture_after() {
     local dmesg_rc=0
     "${sudo_cmd[@]}" lspci -Dvvnn > "$pcie_after_file" || pcie_rc=$?
     lspci -Dtv > "$topology_after_file" || topology_rc=$?
-    "${sudo_cmd[@]}" dmesg --time-format=raw > "$dmesg_after_file" || dmesg_rc=$?
+    if memblaze_capture_kernel_log_file "$dmesg_after_file" "$dmesg_after_diagnostics"; then
+        dmesg_rc=0
+    else
+        dmesg_rc=$?
+    fi
+    cat "$dmesg_after_diagnostics"
     after_captured=1
     printf 'AfterCaptureRC=pcie:%s,topology:%s,dmesg:%s\n' \
         "$pcie_rc" "$topology_rc" "$dmesg_rc"
@@ -203,7 +216,12 @@ printf 'WARNING: selected volatile FPGA DDR ranges will be overwritten.\n'
 
 "${sudo_cmd[@]}" lspci -Dvvnn > "$pcie_before_file"
 lspci -Dtv > "$topology_before_file"
-"${sudo_cmd[@]}" dmesg --time-format=raw > "$dmesg_before_file"
+if ! memblaze_select_kernel_log_file "$dmesg_before_file" "$dmesg_before_diagnostics"; then
+    cat "$dmesg_before_diagnostics" >&2
+    stop "the pre-test kernel log could not be read from dmesg or the current-boot kernel journal"
+fi
+printf 'KERNEL_LOG_BACKEND=%s\n' "$MEMBLAZE_KERNEL_LOG_BACKEND"
+cat "$dmesg_before_diagnostics"
 readonly dmesg_lines_before="$(wc -l < "$dmesg_before_file")"
 capture_started=1
 

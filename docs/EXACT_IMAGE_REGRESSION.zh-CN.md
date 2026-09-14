@@ -55,6 +55,17 @@ FPGA configuration flash 或启动项。它会覆盖 FPGA 外部 DDR 的测试�
 因桌面空闲而自动挂起。进程退出后该锁自动释放，不会修改系统电源策略；本轮
 仍不要手动执行挂起、休眠或关机。
 
+内核日志采集兼容 Ubuntu 24.04 随附的 util-linux 2.39.3：脚本使用默认
+单调时间戳的 `dmesg`，读取失败时才退回当前启动的 kernel journal。选定后端
+会贯穿同一组前后快照。若两个来源均不可读，脚本会在任何 FPGA DDR 写入前
+停止，并把每次尝试的命令、退出码和错误输出保存下来。
+
+驱动构建之前还会提前确认 x86-64 架构、编译工具、当前内核的 headers 和
+`scripts/sign-file`；MOK 公钥须可由当前用户读取，私钥须由 root/当前用户持有
+且权限为 0400/0600，并且公私钥确实匹配、DER 证书可解析、`mokutil` 明确报告
+该证书已注册。随后真实执行仓库的 kernel-log 兼容性合约；这些前置条件任一
+失败都会先停下来，避免先花时间编译或进入 DMA。
+
 先用 `lsblk -o NAME,PATH,SIZE,MODEL,SERIAL,TRAN` 找到承载 `casper-rw` 的
 USB 整盘序列号前缀。Ubuntu 有时会在 Windows 所见的 USB 序列号后追加字符，
 所以脚本接受至少 16 字符的受信前缀。不要把内置 NVMe 的序列号填给脚本。

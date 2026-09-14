@@ -1,0 +1,26 @@
+# Sanitized negative evidence from the first exact-image transport run.
+# This run stopped before PCIe enumeration and before any FPGA DDR write.
+
+EVIDENCE_TYPE=EXACT_IMAGE_PREFLIGHT_FAILURE
+UTC_DATE=2026-09-15
+TARGET_OS=Ubuntu_24.04.5_LTS
+TARGET_UTIL_LINUX=2.39.3-9ubuntu6.6
+OFFLINE_PACKAGE_CHECK=PASS
+PERSISTENT_HOME_COPY=PASS
+STORAGE_BOUNDARY=PASS
+INTERNAL_NVME_MOUNTED=no
+FAILURE_COMMAND=dmesg_--time-format=raw
+FAILURE_REASON=unsupported_time_format_on_target_util_linux
+INNER_EXPERIMENT_RC=1
+INNER_EVIDENCE_BUNDLE=unavailable
+PCI_ENUMERATION=NOT_STARTED
+XDMA_BUILD=NOT_STARTED
+XDMA_DRIVER=NOT_STARTED
+DMA_DATA_COMPARE=NOT_STARTED
+FPGA_DDR_WRITE=NOT_STARTED
+TRANSPORT_EVIDENCE_EXPORT=PASS
+
+# Corrective action: use plain dmesg, fall back to the current-boot kernel
+# journal only when dmesg itself fails, retain both backends' diagnostics, and
+# execute the compatibility contract on the extracted offline archive before
+# any hardware-write stage.

@@ -12,22 +12,6 @@ set -Eeuo pipefail
 export LC_ALL=C
 umask 077
 
-# Acquire a session-scoped idle inhibitor before any long operation. This blocks
-# automatic idle-triggered suspend without requiring the privileged inhibitor
-# used to reject explicit sleep requests. No persistent power setting is changed.
-if [[ "${MEMBLAZE_IDLE_INHIBITED:-0}" != "1" ]]; then
-    command -v systemd-inhibit >/dev/null 2>&1 || {
-        printf 'ERROR: systemd-inhibit is required to prevent idle suspend during this run\n' >&2
-        exit 1
-    }
-    exec systemd-inhibit \
-        --what=idle \
-        --mode=block \
-        --who=memblaze-k7-xdma-lab \
-        --why='Protected one-session FPGA DDR regression' \
-        env MEMBLAZE_IDLE_INHIBITED=1 bash "$0" "$@"
-fi
-
 usage() {
     cat <<'EOF'
 Usage:
@@ -129,15 +113,34 @@ if [[ -n "$expected_hash_arg" ]]; then
         || die_usage "--expected-bitstream-sha256 must be 64 lowercase hexadecimal characters"
 fi
 
+# Acquire a session-scoped idle inhibitor after argument/help handling and
+# before any long operation. No persistent power setting is changed.
+if [[ "${MEMBLAZE_IDLE_INHIBITED:-0}" != "1" ]]; then
+    command -v systemd-inhibit >/dev/null 2>&1 || {
+        printf 'ERROR: systemd-inhibit is required to prevent idle suspend during this run\n' >&2
+        exit 1
+    }
+    exec systemd-inhibit \
+        --what=idle \
+        --mode=block \
+        --who=memblaze-k7-xdma-lab \
+        --why='Protected one-session FPGA DDR regression' \
+        env MEMBLAZE_IDLE_INHIBITED=1 bash "$0" "$@"
+fi
+
 readonly script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly kit_root="$(cd -- "$script_dir/.." && pwd)"
+readonly dmesg_helper="$script_dir/lib/dmesg_capture.sh"
 readonly manifest="$kit_root/RELEASE_MANIFEST.json"
 readonly validator="$kit_root/tools/validate_repo.py"
+readonly kernel_log_contract="$kit_root/tools/test_dmesg_capture.sh"
 readonly expected_id="10ee:7024"
 readonly expected_subsystem_vendor="0x10ee"
 readonly expected_subsystem_device="0x0007"
 readonly build_tag="b8466090-aba9086b051e"
 readonly kernel_release="$(uname -r)"
+readonly kernel_build_dir="/lib/modules/$kernel_release/build"
+readonly kernel_sign_file="$kernel_build_dir/scripts/sign-file"
 readonly standard_build_root="${HOME:?HOME is not set}/memblaze-xdma-work/$build_tag/$kernel_release"
 readonly module="$standard_build_root/dma_ip_drivers-b8466090/XDMA/linux-kernel/xdma/xdma.ko"
 readonly results_root="$HOME/memblaze-xdma-results"
@@ -156,13 +159,19 @@ stop_before_dma() {
 # This list is checked before mkdir, tee, build extraction, signing, or other
 # persistent writes. sudo authentication only creates an ephemeral timestamp.
 for cmd in awk bash basename cat cmp cp cut date df dirname dmesg env find findmnt \
-    grep head id lspci lsblk mkdir mktemp modinfo mokutil mv openssl python3 \
-    readlink rm sha256sum sleep sort stat sudo tail tar tee timeout touch tr \
-    uname wc xargs; do
+    gcc grep head id lspci lsblk make mkdir mktemp modinfo mokutil mv nproc \
+    openssl patch python3 readlink rm sed sha256sum sleep sort stat sudo tail \
+    tar tee timeout touch tr uname wc xargs; do
     command -v "$cmd" >/dev/null 2>&1 || stop_before_write "missing command: $cmd"
 done
 [[ -r "$manifest" ]] || stop_before_write "release manifest is missing"
 [[ -r "$validator" ]] || stop_before_write "repository validator is missing"
+[[ -r "$dmesg_helper" ]] || stop_before_write "kernel-log helper is missing"
+[[ -r "$kernel_log_contract" ]] \
+    || stop_before_write "kernel-log runtime contract is missing"
+# shellcheck source=linux/lib/dmesg_capture.sh
+source "$dmesg_helper" || stop_before_write "kernel-log helper could not be loaded"
+sudo_cmd=(sudo)
 [[ -r "$bitstream" ]] || stop_before_write "bitstream is unreadable: $bitstream"
 [[ -r "$bitstream_sha_file" ]] \
     || stop_before_write "bitstream SHA-256 sidecar is unreadable: $bitstream_sha_file"
@@ -216,13 +225,68 @@ cow_serial="$(lsblk -dn -o SERIAL "$cow_parent" | awk '{$1=$1; print}')"
     || stop_before_write "the persistence disk serial does not match --expected-live-disk-serial-prefix"
 
 sudo -v || stop_before_write "sudo authentication failed"
+
+[[ "$(uname -m)" == "x86_64" ]] \
+    || stop_before_write "the pinned XDMA driver workflow requires an x86_64 Linux host"
+[[ -e "$kernel_build_dir/Makefile" ]] \
+    || stop_before_write "kernel headers are missing for $kernel_release"
+[[ -x "$kernel_sign_file" ]] \
+    || stop_before_write "kernel module sign-file is missing for $kernel_release"
+sudo test -f "$mok_certificate" && [[ -r "$mok_certificate" ]] \
+    || stop_before_write "the supplied MOK certificate is not a regular file readable by the current user"
+sudo test -f "$mok_private" && sudo test -r "$mok_private" \
+    || stop_before_write "the supplied MOK private key is not a readable regular file"
+mok_private_owner_mode="$(sudo stat -Lc '%u:%a' "$mok_private")" \
+    || stop_before_write "the MOK private-key owner and mode could not be read"
+readonly mok_private_owner_mode
+case "$mok_private_owner_mode" in
+    0:400|0:600|"$(id -u)":400|"$(id -u)":600) ;;
+    *)
+        stop_before_write "the MOK private key owner/mode must be root or the current user with mode 400 or 600"
+        ;;
+esac
+sudo openssl x509 -inform DER -in "$mok_certificate" -noout -serial >/dev/null 2>&1 \
+    || stop_before_write "the supplied MOK certificate is not a readable DER X.509 certificate"
+certificate_public_key_sha="$(
+    sudo openssl x509 -inform DER -in "$mok_certificate" -pubkey -noout 2>/dev/null \
+        | openssl pkey -pubin -outform DER 2>/dev/null \
+        | sha256sum | awk '{print $1}'
+)" || stop_before_write "the MOK certificate public key could not be read"
+private_public_key_sha="$(
+    sudo openssl pkey -in "$mok_private" -passin pass: -pubout -outform DER 2>/dev/null \
+        | sha256sum | awk '{print $1}'
+)" || stop_before_write "the MOK private key could not be parsed non-interactively"
+[[ "$certificate_public_key_sha" =~ ^[0-9a-f]{64}$ \
+   && "$private_public_key_sha" == "$certificate_public_key_sha" ]] \
+    || stop_before_write "the supplied MOK private key does not match the certificate"
 set +e
-boot_dmesg="$(sudo dmesg --time-format=raw 2>&1)"
-boot_dmesg_rc=$?
-secure_boot_output="$(mokutil --sb-state 2>&1)"
-secure_boot_rc=$?
+mok_test_output="$(mokutil --test-key "$mok_certificate" 2>&1)"
+mok_test_rc=$?
 set -e
-(( boot_dmesg_rc == 0 )) || stop_before_write "the current kernel log could not be read"
+if ! grep -Fx -- "$mok_certificate is already enrolled" <<< "$mok_test_output" >/dev/null \
+    && ! grep -Fx -- "$mok_certificate is already in the built-in trusted keyring" \
+        <<< "$mok_test_output" >/dev/null; then
+    printf 'MOK_TEST_KEY_RC=%s\n%s\n' "$mok_test_rc" "$mok_test_output" >&2
+    stop_before_write "the supplied MOK certificate is not confirmed as enrolled"
+fi
+printf 'EARLY_TOOLCHAIN_AND_MOK_PREFLIGHT=PASS\n'
+
+boot_dmesg=""
+boot_dmesg_diagnostics=""
+if ! memblaze_select_kernel_log_text boot_dmesg boot_dmesg_diagnostics; then
+    printf '%s\n' "$boot_dmesg_diagnostics" >&2
+    stop_before_write "the current kernel log could not be read from dmesg or the current-boot kernel journal"
+fi
+printf 'KERNEL_LOG_BACKEND=%s\n' "$MEMBLAZE_KERNEL_LOG_BACKEND"
+if [[ -n "$boot_dmesg_diagnostics" ]]; then
+    printf 'WARN: dmesg was unavailable; using the current-boot kernel journal for this run.\n' >&2
+    printf '%s\n' "$boot_dmesg_diagnostics" >&2
+fi
+if secure_boot_output="$(mokutil --sb-state 2>&1)"; then
+    secure_boot_rc=0
+else
+    secure_boot_rc=$?
+fi
 storage_errors="$(grep -Ei \
     'attempt to access beyond end of device|Buffer I/O error|JBD2:.*error|Remounting filesystem read-only' \
     <<< "$boot_dmesg" || true)"
@@ -373,6 +437,13 @@ readonly bundle_sidecar="$bundle_path.sha256"
 
 mkdir -p "$run_root" "$step_results_copy" "$bundle_root"
 touch "$results_marker"
+{
+    printf 'KERNEL_LOG_BACKEND=%s\n' "$MEMBLAZE_KERNEL_LOG_BACKEND"
+    if [[ -n "$boot_dmesg_diagnostics" ]]; then
+        printf '%s\n' "$boot_dmesg_diagnostics"
+    fi
+} > "$run_root/prewrite_dmesg_selection.log"
+printf '%s\n' "$boot_dmesg" > "$run_root/prewrite_boot_dmesg.txt"
 cp -- "$jtag_report" "$run_root/windows_jtag_program_status.txt"
 printf '%s\n' "$report_sidecar_value" > "$run_root/windows_jtag_program_status.txt.sha256"
 printf '%s\n' "$jtag_report_text" > "$run_root/windows_jtag_program_status.normalized-lf.txt"
@@ -392,6 +463,7 @@ run_workflow() (
     sudo_keepalive_pid=""
     temp_mok_copy=""
     initial_dmesg_lines=0
+    readonly log_flush_poll_attempts=600
 
     append_summary() {
         printf '%s\n' "$1" >> "$summary_file"
@@ -400,9 +472,14 @@ run_workflow() (
     capture_state() {
         local label="$1"
         local capture_rc=0
+        local dmesg_diagnostics="$run_root/${label}_dmesg_capture.log"
         sudo lspci -Dvvnnk > "$run_root/${label}_lspci.txt" || capture_rc=1
         lspci -Dtv > "$run_root/${label}_topology.txt" || capture_rc=1
-        sudo dmesg --time-format=raw > "$run_root/${label}_dmesg.txt" || capture_rc=1
+        if ! memblaze_capture_kernel_log_file \
+            "$run_root/${label}_dmesg.txt" "$dmesg_diagnostics"; then
+            cat "$dmesg_diagnostics" >&2
+            capture_rc=1
+        fi
         printf 'STATE_CAPTURE_%s_RC=%s\n' "${label^^}" "$capture_rc"
         return "$capture_rc"
     }
@@ -480,7 +557,7 @@ run_workflow() (
         local marker_file="$2"
         local candidates=()
         local attempt
-        for (( attempt=0; attempt<50; attempt++ )); do
+        for (( attempt=0; attempt<log_flush_poll_attempts; attempt++ )); do
             mapfile -t candidates < <(
                 find "$results_root" -mindepth 2 -maxdepth 2 -type f \
                     -name "$log_name" -newer "$marker_file" -printf '%h\n' | sort -u
@@ -492,6 +569,8 @@ run_workflow() (
             (( ${#candidates[@]} <= 1 )) || return 2
             sleep 0.1
         done
+        printf 'LOG_FLUSH_TIMEOUT: no complete %s result appeared within 60 seconds\n' \
+            "$log_name" >&2
         return 1
     }
 
@@ -506,7 +585,7 @@ run_workflow() (
         # Each child uses process-substitution tee for its result log. The child
         # can exit just before that tee flushes the final lines, so poll the
         # complete marker and exact counts instead of validating once.
-        for (( attempt=0; attempt<50; attempt++ )); do
+        for (( attempt=0; attempt<log_flush_poll_attempts; attempt++ )); do
             if grep -Fxq 'DMA_DATA_COMPARE=PASS' "$log" \
                 && grep -Fxq "SavedResult=$result_dir" "$log" \
                 && [[ "$(grep -c '^H2C_RC=0$' "$log" || true)" -eq "$expected_cases" ]] \
@@ -517,7 +596,14 @@ run_workflow() (
             fi
             sleep 0.1
         done
-        (( ready == 1 )) || return 1
+        (( ready == 1 )) || {
+            printf 'LOG_FLUSH_TIMEOUT: smoke result did not become complete within 60 seconds: %s\n' \
+                "$log" >&2
+            return 1
+        }
+        for file in dmesg_before_smoke_capture.log dmesg_after_smoke_capture.log; do
+            [[ -s "$result_dir/$file" ]] || return 1
+        done
         printf 'SMOKE_RESULT_DIR=%s\n' "$result_dir" >> "$summary_file"
     }
 
@@ -531,11 +617,12 @@ run_workflow() (
         local required=(
             06_extended_validation.log pattern_manifest.txt
             dmesg_before_extended.txt dmesg_after_extended.txt
+            dmesg_before_extended_capture.log dmesg_after_extended_capture.log
             pcie_before_extended.txt pcie_after_extended.txt
             pcie_topology_before.txt pcie_topology_after.txt
         )
         local file attempt ready=0
-        for (( attempt=0; attempt<50; attempt++ )); do
+        for (( attempt=0; attempt<log_flush_poll_attempts; attempt++ )); do
             ready=1
             for file in "${required[@]}"; do
                 [[ -s "$result_dir/$file" ]] || ready=0
@@ -550,7 +637,11 @@ run_workflow() (
             ready=0
             sleep 0.1
         done
-        (( ready == 1 )) || return 1
+        (( ready == 1 )) || {
+            printf 'LOG_FLUSH_TIMEOUT: extended result did not become complete within 60 seconds: %s\n' \
+                "$result_dir" >&2
+            return 1
+        }
         for file in "${required[@]}"; do
             [[ -s "$result_dir/$file" ]] || return 1
         done
@@ -589,6 +680,7 @@ run_workflow() (
         local required=(
             07_release_advanced.log full_4g_pattern_manifest.txt
             dmesg_before_advanced.txt dmesg_after_advanced.txt
+            dmesg_before_advanced_capture.log dmesg_after_advanced_capture.log
             pcie_path_before_advanced.txt pcie_path_after_advanced.txt
             pcie_path_status_before_advanced.txt pcie_path_status_after_advanced.txt
             pcie_topology_before_advanced.txt pcie_topology_after_advanced.txt
@@ -596,7 +688,7 @@ run_workflow() (
         )
         local file attempt ready=0
         local irq_status irq_reason aer_status aer_captured aer_reason
-        for (( attempt=0; attempt<50; attempt++ )); do
+        for (( attempt=0; attempt<log_flush_poll_attempts; attempt++ )); do
             ready=1
             for file in "${required[@]}"; do
                 [[ -s "$result_dir/$file" ]] || ready=0
@@ -611,7 +703,11 @@ run_workflow() (
             ready=0
             sleep 0.1
         done
-        (( ready == 1 )) || return 1
+        (( ready == 1 )) || {
+            printf 'LOG_FLUSH_TIMEOUT: advanced result did not become complete within 60 seconds: %s\n' \
+                "$result_dir" >&2
+            return 1
+        }
         for file in "${required[@]}"; do
             [[ -s "$result_dir/$file" ]] || return 1
         done
@@ -710,6 +806,7 @@ run_workflow() (
     append_summary 'PERSISTENT_LIVE_USB=PASS'
     append_summary 'SECURE_BOOT_PRECHECK=PASS'
     append_summary 'IDLE_INHIBITOR=active'
+    append_summary "KERNEL_LOG_BACKEND=$MEMBLAZE_KERNEL_LOG_BACKEND"
     append_summary "KERNEL=$kernel_release"
     append_summary "REPOSITORY_ROOT=$kit_root"
     if command -v git >/dev/null 2>&1 && git -C "$kit_root" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -766,6 +863,8 @@ run_workflow() (
     sudo_keepalive_pid=$!
 
     run_step REPOSITORY_VALIDATE env PYTHONDONTWRITEBYTECODE=1 python3 "$validator"
+    run_step KERNEL_LOG_CONTRACT bash "$kernel_log_contract"
+    append_summary 'KERNEL_LOG_CONTRACT=PASS'
 
     [[ ! -d /sys/module/xdma ]] \
         || { printf 'STOP: xdma was already loaded before this workflow\n' >&2; exit 1; }
@@ -809,20 +908,6 @@ run_workflow() (
     run_step BUILD bash "$script_dir/02_build_driver.sh"
     [[ -f "$module" ]] || { printf 'STOP: fresh build did not produce xdma.ko\n' >&2; exit 1; }
 
-    readonly sign_file="/usr/src/linux-headers-$kernel_release/scripts/sign-file"
-    [[ -x "$sign_file" ]] || { printf 'STOP: kernel sign-file is missing\n' >&2; exit 1; }
-    sudo test -f "$mok_certificate" && sudo test -r "$mok_certificate" \
-        || { printf 'STOP: MOK certificate is not a readable regular file\n' >&2; exit 1; }
-    sudo test -f "$mok_private" && sudo test -r "$mok_private" \
-        || { printf 'STOP: MOK private key is not a readable regular file\n' >&2; exit 1; }
-    readonly mok_private_owner_mode="$(sudo stat -Lc '%u:%a' "$mok_private")"
-    case "$mok_private_owner_mode" in
-        0:400|0:600|"$(id -u)":400|"$(id -u)":600) ;;
-        *)
-            printf 'STOP: MOK private key owner/mode must be root or the current user with mode 400 or 600\n' >&2
-            exit 1
-            ;;
-    esac
     temp_mok_copy="$(mktemp /dev/shm/memblaze-mok.XXXXXXXX.der)"
     sudo cat -- "$mok_certificate" > "$temp_mok_copy"
     [[ -s "$temp_mok_copy" ]] || { printf 'STOP: temporary public MOK copy is empty\n' >&2; exit 1; }
@@ -830,7 +915,7 @@ run_workflow() (
     append_summary "MOK_PRIVATE_OWNER_MODE=$mok_private_owner_mode"
 
     printf '\n=== Sign fresh module with the existing enrolled MOK ===\n'
-    sudo "$sign_file" sha256 "$mok_private" "$mok_certificate" "$module"
+    sudo "$kernel_sign_file" sha256 "$mok_private" "$mok_certificate" "$module"
     readonly module_signer="$(modinfo -F signer "$module" 2>/dev/null || true)"
     [[ -n "$module_signer" ]] || { printf 'STOP: signed module has no modinfo signer\n' >&2; exit 1; }
     append_summary "SIGNED_MODULE_SHA256=$(sha256sum "$module" | awk '{print $1}')"
@@ -853,7 +938,13 @@ run_workflow() (
         || { printf 'STOP: root overlay source changed\n' >&2; exit 1; }
     [[ ",$(findmnt -rn -T / -o OPTIONS)," == *,rw,* ]] \
         || { printf 'STOP: root overlay became read-only\n' >&2; exit 1; }
-    preload_dmesg="$(sudo dmesg --time-format=raw)"
+    preload_dmesg=""
+    preload_dmesg_diagnostics=""
+    if ! memblaze_capture_kernel_log_text preload_dmesg preload_dmesg_diagnostics; then
+        printf '%s\n' "$preload_dmesg_diagnostics" >&2
+        printf 'STOP: kernel log became unreadable before module load\n' >&2
+        exit 1
+    fi
     preload_storage_errors="$(grep -Ei \
         'attempt to access beyond end of device|Buffer I/O error|JBD2:.*error|Remounting filesystem read-only' \
         <<< "$preload_dmesg" || true)"

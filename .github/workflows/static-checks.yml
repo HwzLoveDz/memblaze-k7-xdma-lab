@@ -9,7 +9,9 @@ permissions:
 
 jobs:
   validate:
-    runs-on: ubuntu-latest
+    # This is the documented Live-USB userspace target. Pinning it prevents a
+    # future ubuntu-latest migration from hiding a util-linux compatibility bug.
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Release publication checks
@@ -18,8 +20,10 @@ jobs:
         run: python3 tools/generate_sha256s.py --check
       - name: Shell syntax
         run: |
-          for script in linux/*.sh; do
+          while IFS= read -r -d '' script; do
             bash -n "$script"
-          done
+          done < <(find linux tools -type f -name '*.sh' -print0 | sort -z)
+      - name: Kernel-log runtime contract
+        run: bash tools/test_dmesg_capture.sh
       - name: Python syntax
         run: python3 -m py_compile tools/*.py

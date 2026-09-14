@@ -20,6 +20,18 @@ All notable changes to this project will be documented here.
   open-items documentation.
 - Static publication checks and deterministic checksum tooling.
 
+### Fixed
+
+- Replaced the unsupported `dmesg --time-format=raw` invocation with a shared
+  kernel-log capture helper compatible with Ubuntu 24.04's util-linux 2.39.3.
+  It uses plain `dmesg` first, falls back to the current-boot kernel journal,
+  fixes one backend for every before/after pair, and records both return codes
+  and error output when capture is unavailable.
+- Added an executable regression test for kernel-log selection and diagnostics,
+  and pinned the repository CI check to Ubuntu 24.04.
+- Extended exact-run result-log polling to 60 seconds so child `tee` processes
+  can finish flushing before the parent validates their markers.
+
 ### Release blockers
 
 - Run the exact clean-build bitstream through JTAG, enumeration, driver, DMA, extended

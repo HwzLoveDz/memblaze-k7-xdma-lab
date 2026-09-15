@@ -14,7 +14,7 @@ PCIe checks, and cleanup.
 | File | Claim supported |
 |---|---|
 | `validated_repository_clean_build_vivado_2026_1_sanitized.log` | self-contained source build, implementation checks, and bitstream identity |
-| `validated_repository_exact_image_physical_regression_sanitized.log` | matching bitstream, current BAR, Secure Boot/XDMA, basic and concurrent DMA, full 4 GiB comparison, bounded harness adjudication, and cleanup |
+| `validated_repository_exact_image_physical_regression_sanitized.log` | RC4 matching bitstream, current BAR, Secure Boot/XDMA, basic and concurrent DMA, full 4 GiB comparison, post-cleanup kernel gate, and cleanup |
 | `validated_jtag_sram_program_20260914_sanitized.log` | volatile XC7K325T configuration completed |
 | `validated_pcie_path_20260914_sanitized.log` | endpoint identity and reported topology fields |
 | `validated_build_load_cleanup_20260914_sanitized.log` | build, MOK acceptance, binding, device nodes, cleanup |
@@ -42,13 +42,13 @@ runtime checks are required in addition to source-text validation. That run
 did not test enumeration, driver loading, DMA, or DDR; its transport evidence
 only proves the storage boundary and successful failure-log export.
 
-The 2026-09-16 exact run completed every hardware and cleanup gate but its raw
-wrapper returned 1. The only final severe-log match was the XDMA module's
-informational `timeout: h2c ... c2h ...` parameter line. The public evidence
-keeps that raw return code and records the bounded post-run adjudication. The
-corrected filter ignores only that fixed-format information line, retains real
-error examples in its runtime test, and returns zero matches for the captured
-full-session dmesg.
+The final 2026-09-16 RC4 exact run completed every hardware, data, kernel-log,
+and cleanup gate with native `FINAL_EXPERIMENT_RC=0`. Both returned archives
+matched their sidecars, and all 100 files listed by the exact archive's
+internal manifest passed SHA-256 verification. Its final severe-message scan
+ran after cleanup and returned zero matches. The filter ignores only the
+fixed-format XDMA timeout-parameter information line while its runtime contract
+retains real timeout, failure, error, AER, allocation, and storage examples.
 
 For any later repository-image physical regression, confirm that the clean
 build's exact bitstream SHA-256 was used for JTAG. Source/build, JTAG,

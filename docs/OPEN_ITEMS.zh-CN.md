@@ -29,7 +29,7 @@
 | 单次 1 GiB | 历史 C2H 以 137 结束且没有 compare；公开脚本把单请求限制为 64 MiB，`16 × 64 MiB` 已覆盖前 1 GiB |
 | 端到端吞吐 | 拓扑字段与 XDMA 工具计时不自洽，现阶段不宣称峰值；当前桥接链路会影响性能评估 |
 | 双通道并发 | channel 0/1 各 64 MiB 同时往返并比较通过；尚未做长时间并发压力和错误恢复注入 |
-| 中断与 event | 本轮记录 dedicated MSI vectors 且 XDMA IRQ 增量 1187；尚未验证 event 节点功能和用户中断延迟 |
+| 中断与 event | 本轮记录 dedicated MSI vectors 且 XDMA IRQ 增量 1188；尚未验证 event 节点功能和用户中断延迟 |
 | 长期稳定性 | 尚未完成数小时循环、温度、功耗、AER 和掉电循环 |
 | Windows DMA | Windows 已用于 Vivado/JTAG 和枚举；XDMA H2C/C2H 数据闭环未验证，仓库不包含 AMD Windows 驱动二进制或受限源码，公开数据面仍以原生 Linux 为准 |
 | 跨环境兼容 | 既有驱动实测环境为 x86-64 Ubuntu 24.04.5、内核 `7.0.0-31-generic`；其他发行版和内核需现场构建验证 |

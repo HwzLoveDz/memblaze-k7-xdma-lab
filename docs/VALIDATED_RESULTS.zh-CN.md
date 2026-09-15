@@ -9,31 +9,30 @@
 ```
 
 同一文件随后通过 JTAG 写入 XC7K325T 易失 SRAM，并在保持 FPGA 外部供电的
-情况下进入 Ubuntu。实机完成 PCIe 枚举、XDMA 构建/签名/加载、基础 DMA、
-双通道 DMA、`alias-4g`、`chunked-1g`、完整 4 GiB 分块数据比较、PCIe/AER
-检查和清理。构建、JTAG 和实机证据中的 bitstream 哈希完全一致。
+情况下进入 Ubuntu。RC4 实机完成 PCIe 枚举、XDMA 全新构建/签名/加载、基础
+DMA、双通道 DMA、`alias-4g`、`chunked-1g`、完整 4 GiB 分块数据比较、
+PCIe/AER 检查和清理，原生返回 `FINAL_EXPERIMENT_RC=0`。构建、JTAG 和实机
+证据中的 bitstream 哈希完全一致。
 
 固定名脱敏证据为
 [`validated_repository_exact_image_physical_regression_sanitized.log`](../evidence/validated_repository_exact_image_physical_regression_sanitized.log)。
 
-## 原始 FAIL 的处理
+## RC4 证据完整性
 
-原始总控最后返回 `FINAL_EXPERIMENT_RC=1`。这个返回码发生在全部 DMA 和高级
-测试通过之后，原因是最终 dmesg 规则 `xdma.*timeout` 命中了驱动加载时的
-正常参数信息：
+返回的精确证据归档和 transport 归档均与各自 SHA-256 sidecar 一致。精确
+归档内的 `evidence_files.sha256` 含 100 条唯一记录，逐项校验全部通过；最终
+`severe_kernel_messages.txt` 为空。严重消息过滤器的运行时合约在加载 DMA 前
+执行并通过，最终扫描在驱动清理后执行，因此也覆盖卸载阶段。
+
+上一版规则曾把驱动加载时的正常参数信息误判为失败：
 
 ```text
 xdma:xdma_mod_init: desc_blen_max: 0xfffffff/268435455, timeout: h2c 10 c2h 10 sec.
 ```
 
-该行只表示 H2C/C2H 超时参数均设为 10 秒。原始
-`severe_kernel_messages.txt` 只有这一行，证据归档及其内部 96 项 SHA-256
-全部验证通过。修复后的过滤器只排除这条格式固定的模块参数行，继续拦截真正
-的 `timed out`、`timeout`、`failed`、`error`、AER、页分配和存储错误。
-运行时回归测试通过，对本次完整 dmesg 重放后严重消息数由 1 变为 0。
-
-因此本页保留原始 RC=1，同时把硬件/数据结果裁定为 PASS；没有伪造 RC=0，
-也没有为了改变框架返回码而重复覆盖整片 DDR。
+该行只表示 H2C/C2H 超时参数均设为 10 秒。RC4 的过滤器只排除这条格式固定的
+参数行，真正的 `timed out`、`timeout`、`failed`、`error`、AER、页分配和
+存储错误仍会使实验失败。本次无需人工裁定或事后改写结果。
 
 ## 构建与实机条件
 
@@ -67,7 +66,7 @@ xdma:xdma_mod_init: desc_blen_max: 0xfffffff/268435455, timeout: h2c 10 c2h 10 s
 | 高地址/前 1 GiB | PASS；`alias-4g` 与 `chunked-1g` 均一致 |
 | 双通道并发 | PASS；channel 0/1 各 64 MiB 同时往返并分别比较 |
 | 完整 4 GiB | PASS；64 × 64 MiB，64 条 WRITE、64 条 VERIFY、0 mismatch |
-| 内核与 PCIe | PASS；路径摘要稳定，AER 前后稳定，IRQ 增量 1187 |
+| 内核与 PCIe | PASS；路径摘要稳定，AER 前后稳定，IRQ 增量 1188，清理后严重消息 0 |
 | 清理 | PASS；`CLEANUP_RC=0`，模块和 `/dev/xdma*` 节点消失 |
 
 ## DMA 覆盖范围
@@ -102,9 +101,14 @@ C2H0=0x1fc10006
 C2H1=0x1fc10106
 ```
 
-双通道各 64 MiB 并发时，工具墙钟汇总值为 H2C 770.275 MiB/s、C2H
-775.690 MiB/s。完整 4 GiB 分块墙钟值为 H2C 630.705 MiB/s、C2H
-621.497 MiB/s。它们是用户态工具/请求计时，不直接等于 PCIe 链路净吞吐。
+双通道各 64 MiB 并发时，工具墙钟汇总值为 H2C 770.408 MiB/s、C2H
+794.334 MiB/s。完整 4 GiB 分块墙钟值为 H2C 641.454 MiB/s、C2H
+624.475 MiB/s。它们是用户态工具/请求计时，不直接等于 PCIe 链路净吞吐。
+
+从精确工作流 run ID 到清理结果目录约 64.53 秒；其中 XDMA 从加载到卸载约
+55.07 秒。日志同时证明旧构建树先被移走，驱动和用户态工具均在本轮重新构建，
+没有复用旧 DMA 结果。所有阶段合计每个方向实际传输 5,644,488,704 字节，
+双向合计约 10.51 GiB。
 
 同一轮 `lspci` 报告 endpoint 能力为 Gen2 ×8，当前为 Gen2 ×4；上游
 ASMedia/Thunderbolt 字段中仍出现 2.5 GT/s ×1。该字段组合与工具计时不自洽，

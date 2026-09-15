@@ -11,7 +11,7 @@
 
 > **当前状态：** 发布前 `v0.1.0-lab`。完整 FPGA 构建输入位于 `fpga/`，
 > 入口为 `fpga/build.tcl`。Vivado 2026.1 干净构建和同一 bitstream 的
-> 精确映像实机回归均已通过；供电/JTAG 接线图尚未完成。
+> RC4 精确映像实机回归均已通过，最终原生返回码为 0；供电/JTAG 接线图尚未完成。
 > `docs/OPEN_ITEMS.zh-CN.md` 中的发布阻塞项全部关闭后再公开推送。
 
 ## 仓库包含什么
@@ -49,7 +49,7 @@ Secure Boot 保持开启，XDMA v2025.2.0 完成构建、签名、加载、基�
 | 层级 | 当前结论 |
 |---|---|
 | 仓库 FPGA 源 | 完整构建输入位于 `fpga/`，入口为 `fpga/build.tcl` |
-| 仓库映像 | Vivado 2026.1 干净构建和同一 bitstream 的实机回归均通过 |
+| 仓库映像 | Vivado 2026.1 干净构建和同一 bitstream 的 RC4 实机回归均通过，最终 RC=0 |
 | JTAG | XC7K325T 易失 SRAM 配置成功；没有写 configuration flash |
 | PCIe | 唯一 `10ee:7024`、Subsystem `10ee:0007` 端点被枚举 |
 | 驱动构建 | XDMA v2025.2.0 在 `7.0.0-31-generic` 上构建成功 |

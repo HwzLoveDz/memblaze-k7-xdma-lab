@@ -12,7 +12,8 @@ board marking and revision will be frozen with the final wiring/BOM record.
 > **Project status:** pre-publication `v0.1.0-lab`. The complete FPGA build
 > inputs live under `fpga/` and build directly from `fpga/build.tcl`.
 > A clean Vivado 2026.1 build and the matching exact-bitstream physical
-> regression have passed. The final power/JTAG wiring figure is still pending.
+> RC4 regression passed natively with final return code 0. The final power/JTAG
+> wiring figure is still pending.
 > No public push should be made until every release blocker in
 > `docs/OPEN_ITEMS.zh-CN.md` is closed.
 
@@ -57,7 +58,7 @@ bitstream SHA-256 exactly matches the clean-build evidence.
 | Gate | Current evidence |
 |---|---|
 | Repository FPGA source | Complete inputs are stored under `fpga/`; the entry point is `fpga/build.tcl` |
-| Repository image | Clean Vivado 2026.1 build and matching exact-bitstream physical regression passed |
+| Repository image | Clean Vivado 2026.1 build and matching RC4 exact-bitstream physical regression passed with final RC=0 |
 | JTAG configuration | XC7K325T SRAM programming completed; no configuration-flash write |
 | PCIe enumeration | Exactly one `10ee:7024`, subsystem `10ee:0007` endpoint |
 | XDMA build | Driver v2025.2.0 built for `7.0.0-31-generic` |

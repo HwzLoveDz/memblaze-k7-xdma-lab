@@ -60,7 +60,7 @@
     "physical_regression": {
       "status": "pass",
       "evidence_file": "evidence/validated_repository_exact_image_physical_regression_sanitized.log",
-      "evidence_sha256": "c52abe1addea179e41205141be8bbe08900cc982f6f3c7dfec675a8f559a5a71",
+      "evidence_sha256": "e778225dc98d05b7112c3948bf4c903e45214e7c0b6d41afb823c72f0061f246",
       "required_gates": [
         "JTAG volatile SRAM programming",
         "PCIe enumeration",
@@ -79,8 +79,10 @@
       ],
       "pf0_bar0_resource_size_kib": 64,
       "tested_bitstream_sha256": "287f0ff1e9a0bef58842d1769e782fe06ed16cf3019d8e65477ca7a688f5b1c5",
-      "raw_final_experiment_rc": 1,
-      "post_run_adjudication": "pass: the only severe-log match was the XDMA module timeout-parameter report; the corrected filter returned zero matches"
+      "raw_final_experiment_rc": 0,
+      "package_revision": "RC4-post-cleanup-kernel-error-gate",
+      "repository_commit": "b66d251d4088e84d16800fef40921d8ad5829951",
+      "scope_note": "RC4 completed natively with final rc 0; the severe-kernel-message gate ran after cleanup and found no severe messages"
     }
   },
   "physical_baseline": {
@@ -93,7 +95,7 @@
     "endpoint": "10ee:7024",
     "subsystem": "10ee:0007",
     "result": "exact repository bitstream, enumeration, driver binding, basic and concurrent DMA, full 4 GiB chunked comparison, AER/path stability, and cleanup passed",
-    "scope_note": "The raw wrapper returned 1 only because its final regex treated the XDMA module timeout-parameter report as an error; the returned evidence was hash-verified and the corrected filter produced zero severe matches."
+    "scope_note": "The RC4 wrapper returned 0 natively after the post-cleanup kernel gate; its returned evidence archive and all 100 internally listed files passed SHA-256 verification."
   },
   "xdma_driver": {
     "upstream": "https://github.com/Xilinx/dma_ip_drivers",

@@ -19,6 +19,9 @@ All notable changes to this project will be documented here.
 - English entry page and Chinese operating, troubleshooting, provenance, and
   open-items documentation.
 - Static publication checks and deterministic checksum tooling.
+- Native RC4 exact-image physical regression evidence: fresh XDMA build,
+  Secure Boot load, basic and concurrent DMA, full 4 GiB comparison,
+  post-cleanup kernel scan, and cleanup all completed with return code 0.
 
 ### Fixed
 
@@ -45,7 +48,7 @@ All notable changes to this project will be documented here.
 
 - Add and review the original hardware wiring figure, complete physical BOM,
   and measured power-source isolation/backfeed boundary.
-- After those physical records are complete, refresh the evidence and manifest,
+- After those physical records are complete, refresh their manifest entries,
   regenerate `SHA256SUMS.txt`, and run the strict release validator.
 
 ### Known limits

@@ -857,6 +857,9 @@ def check_release_evidence(
                 "XDMA_DRIVER": "PASS",
                 "WINDOWS_JTAG_EVIDENCE": "PASS",
                 "IDLE_INHIBITOR": "active",
+                "KERNEL_LOG_CONTRACT": "PASS",
+                "KERNEL_ERROR_CONTRACT": "PASS",
+                "KERNEL_ERROR_FILTER_REGRESSION": "PASS",
                 "DMA_DATA_COMPARE": "PASS",
                 "DMA_64M_BOTH_CHANNELS": "PASS",
                 "ALIAS_4G": "PASS",
@@ -869,43 +872,22 @@ def check_release_evidence(
                 "FULL_4G_WRITE_RECORDS": "64",
                 "FULL_4G_VERIFY_RECORDS": "64",
                 "FULL_4G_VERIFY_MISMATCHES": "0",
+                "TOTAL_H2C_BYTES": "5644488704",
+                "TOTAL_C2H_BYTES": "5644488704",
+                "TOTAL_BIDIRECTIONAL_BYTES": "11288977408",
                 "ADVANCED_RELEASE_VALIDATION": "PASS",
                 "PCIE_PATH_STATUS_STABLE": "yes",
                 "INTERNAL_EVIDENCE_SHA256": "PASS",
+                "CLEANUP_STATUS": "PASS",
                 "CLEANUP_RC": "0",
                 "FINAL_STATE_CAPTURE_RC": "0",
+                "WORKFLOW_COMPLETE": "yes",
+                "NEW_SEVERE_KERNEL_MESSAGES": "none",
+                "FINAL_DATA_TESTS": "PASS",
+                "FINAL_EXPERIMENT_RC": "0",
             },
             errors,
         )
-        final_experiment_rc = values.get("FINAL_EXPERIMENT_RC")
-        if final_experiment_rc == "0":
-            require_evidence_values(
-                physical_path,
-                values,
-                {"NEW_SEVERE_KERNEL_MESSAGES": "none"},
-                errors,
-            )
-        elif final_experiment_rc == "1":
-            require_evidence_values(
-                physical_path,
-                values,
-                {
-                    "RAW_HARNESS_RESULT": "FAIL",
-                    "POST_RUN_ADJUDICATION": "PASS",
-                    "HARNESS_FALSE_POSITIVE": "XDMA_TIMEOUT_CONFIGURATION_LINE",
-                    "RAW_SEVERE_MATCH_COUNT": "1",
-                    "CORRECTED_SEVERE_MATCH_COUNT": "0",
-                    "CORRECTED_NEW_SEVERE_KERNEL_MESSAGES": "none",
-                    "KERNEL_ERROR_FILTER_REGRESSION": "PASS",
-                },
-                errors,
-            )
-        else:
-            errors.append(
-                f"{physical_path.relative_to(ROOT)} must record "
-                "FINAL_EXPERIMENT_RC as 0, or as 1 with the bounded "
-                "XDMA timeout-configuration false-positive adjudication"
-            )
         irq_status = values.get("IRQ_DELTA_STATUS")
         if irq_status not in {"PASS", "UNAVAILABLE"}:
             errors.append(
@@ -937,6 +919,22 @@ def check_release_evidence(
             errors.append(
                 "physical-regression manifest PF0 BAR0 resource size differs "
                 "from its lspci evidence"
+            )
+        if physical_regression.get("raw_final_experiment_rc") != 0:
+            errors.append(
+                "physical-regression manifest must record raw_final_experiment_rc=0"
+            )
+        if physical_regression.get("package_revision") != values.get(
+            "PACKAGE_REVISION"
+        ):
+            errors.append(
+                "physical-regression manifest package revision differs from its evidence"
+            )
+        if physical_regression.get("repository_commit") != values.get(
+            "REPOSITORY_COMMIT"
+        ):
+            errors.append(
+                "physical-regression manifest repository commit differs from its evidence"
             )
         tested_hash = values.get("BITSTREAM_SHA256")
         if not isinstance(tested_hash, str) or not re.fullmatch(

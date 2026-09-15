@@ -80,6 +80,7 @@ REQUIRED = {
     "fpga/program_sram.tcl",
     "tools/generate_sha256s.py",
     "tools/test_dmesg_capture.sh",
+    "tools/test_exact_wrapper_reexec.sh",
     "vendor/xdma_linux_kernel_b8466090.tar.gz",
     "vendor/xdma_linux_kernel_b8466090.sha256",
     "LICENSES/GPL-2.0.txt",

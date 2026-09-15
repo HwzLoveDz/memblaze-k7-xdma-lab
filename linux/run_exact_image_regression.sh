@@ -12,6 +12,11 @@ set -Eeuo pipefail
 export LC_ALL=C
 umask 077
 
+# Argument parsing below consumes "$@" with shift. Preserve the original list
+# because systemd-inhibit re-executes this script after parsing.
+original_args=("$@")
+readonly -a original_args
+
 usage() {
     cat <<'EOF'
 Usage:
@@ -125,7 +130,7 @@ if [[ "${MEMBLAZE_IDLE_INHIBITED:-0}" != "1" ]]; then
         --mode=block \
         --who=memblaze-k7-xdma-lab \
         --why='Protected one-session FPGA DDR regression' \
-        env MEMBLAZE_IDLE_INHIBITED=1 bash "$0" "$@"
+        env MEMBLAZE_IDLE_INHIBITED=1 bash "$0" "${original_args[@]}"
 fi
 
 readonly script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"

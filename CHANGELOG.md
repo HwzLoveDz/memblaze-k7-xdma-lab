@@ -31,6 +31,10 @@ All notable changes to this project will be documented here.
   and pinned the repository CI check to Ubuntu 24.04.
 - Extended exact-run result-log polling to 60 seconds so child `tee` processes
   can finish flushing before the parent validates their markers.
+- Preserved the exact-run arguments across the `systemd-inhibit` re-exec. The
+  previous wrapper parsed and shifted all arguments before restarting itself,
+  so the protected run stopped at its confirmation gate. A runtime regression
+  test now captures and compares every re-exec argument.
 
 ### Release blockers
 

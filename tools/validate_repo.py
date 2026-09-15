@@ -70,6 +70,7 @@ REQUIRED = {
     "linux/run_exact_image_regression.sh",
     "linux/99_cleanup.sh",
     "linux/lib/dmesg_capture.sh",
+    "linux/lib/kernel_error_filter.sh",
     "linux/patches/0001-portable-kbuild.patch",
     "fpga/build.tcl",
     "fpga/create_project.tcl",
@@ -81,6 +82,7 @@ REQUIRED = {
     "tools/generate_sha256s.py",
     "tools/test_dmesg_capture.sh",
     "tools/test_exact_wrapper_reexec.sh",
+    "tools/test_kernel_error_filter.sh",
     "vendor/xdma_linux_kernel_b8466090.tar.gz",
     "vendor/xdma_linux_kernel_b8466090.sha256",
     "LICENSES/GPL-2.0.txt",
@@ -862,13 +864,48 @@ def check_release_evidence(
                 "CONTROL_ENGINE_IDENTIFIERS": "PASS",
                 "CONCURRENT_DMA": "PASS",
                 "FULL_4G_DATA_COMPARE": "PASS",
+                "FULL_4G_CHUNK_COUNT": "64",
+                "FULL_4G_BYTES_COVERED": "4294967296",
+                "FULL_4G_WRITE_RECORDS": "64",
+                "FULL_4G_VERIFY_RECORDS": "64",
+                "FULL_4G_VERIFY_MISMATCHES": "0",
+                "ADVANCED_RELEASE_VALIDATION": "PASS",
                 "PCIE_PATH_STATUS_STABLE": "yes",
-                "NEW_SEVERE_KERNEL_MESSAGES": "none",
+                "INTERNAL_EVIDENCE_SHA256": "PASS",
                 "CLEANUP_RC": "0",
-                "FINAL_EXPERIMENT_RC": "0",
+                "FINAL_STATE_CAPTURE_RC": "0",
             },
             errors,
         )
+        final_experiment_rc = values.get("FINAL_EXPERIMENT_RC")
+        if final_experiment_rc == "0":
+            require_evidence_values(
+                physical_path,
+                values,
+                {"NEW_SEVERE_KERNEL_MESSAGES": "none"},
+                errors,
+            )
+        elif final_experiment_rc == "1":
+            require_evidence_values(
+                physical_path,
+                values,
+                {
+                    "RAW_HARNESS_RESULT": "FAIL",
+                    "POST_RUN_ADJUDICATION": "PASS",
+                    "HARNESS_FALSE_POSITIVE": "XDMA_TIMEOUT_CONFIGURATION_LINE",
+                    "RAW_SEVERE_MATCH_COUNT": "1",
+                    "CORRECTED_SEVERE_MATCH_COUNT": "0",
+                    "CORRECTED_NEW_SEVERE_KERNEL_MESSAGES": "none",
+                    "KERNEL_ERROR_FILTER_REGRESSION": "PASS",
+                },
+                errors,
+            )
+        else:
+            errors.append(
+                f"{physical_path.relative_to(ROOT)} must record "
+                "FINAL_EXPERIMENT_RC as 0, or as 1 with the bounded "
+                "XDMA timeout-configuration false-positive adjudication"
+            )
         irq_status = values.get("IRQ_DELTA_STATUS")
         if irq_status not in {"PASS", "UNAVAILABLE"}:
             errors.append(
@@ -1010,6 +1047,7 @@ def check_kernel_log_guards(errors: list[str]) -> None:
             "PROGRAM.FILE",
             "PROGRAM.HW_BITSTREAM",
             'run_step KERNEL_LOG_CONTRACT bash "$kernel_log_contract"',
+            'run_step KERNEL_ERROR_CONTRACT bash "$kernel_error_contract"',
             'run_step PROBE bash "$script_dir/01_probe.sh"',
             'run_step BUILD bash "$script_dir/02_build_driver.sh"',
             'run_step SECURE_BOOT bash "$script_dir/03_secure_boot_status.sh"',
@@ -1069,6 +1107,22 @@ def check_kernel_log_guards(errors: list[str]) -> None:
             errors.append(
                 "linux/run_exact_image_regression.sh must describe and enforce "
                 "a serial prefix because Linux may append a USB serial suffix"
+            )
+        cleanup_index = workflow_text.find(
+            'run_step CLEANUP bash "$script_dir/99_cleanup.sh"'
+        )
+        post_cleanup_capture_index = workflow_text.find(
+            "capture_state after_cleanup_gate"
+        )
+        final_filter_index = workflow_text.find(
+            'if ! severe_kernel_messages="$(memblaze_filter_severe_kernel_messages'
+        )
+        if not (
+            0 <= cleanup_index < post_cleanup_capture_index < final_filter_index
+        ):
+            errors.append(
+                "linux/run_exact_image_regression.sh must capture and filter the "
+                "final kernel log after mandatory cleanup"
             )
 
         # Linux exposed the same validated USB identifier with a controller-added

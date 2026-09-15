@@ -4,7 +4,6 @@
   "release": "0.1.0-lab",
   "status": "pre-publication",
   "publication_blockers": [
-    "exact-bitstream physical regression for the repository-local FPGA design",
     "final original hardware wiring image and measured power-boundary review"
   ],
   "fpga_design": {
@@ -59,9 +58,9 @@
       "bitstream_included": false
     },
     "physical_regression": {
-      "status": "pending",
+      "status": "pass",
       "evidence_file": "evidence/validated_repository_exact_image_physical_regression_sanitized.log",
-      "evidence_sha256": "pending",
+      "evidence_sha256": "c52abe1addea179e41205141be8bbe08900cc982f6f3c7dfec675a8f559a5a71",
       "required_gates": [
         "JTAG volatile SRAM programming",
         "PCIe enumeration",
@@ -78,12 +77,14 @@
         "PCIe and kernel-log stability, with AER recorded when exposed",
         "cleanup"
       ],
-      "pf0_bar0_resource_size_kib": "pending",
-      "tested_bitstream_sha256": "pending"
+      "pf0_bar0_resource_size_kib": 64,
+      "tested_bitstream_sha256": "287f0ff1e9a0bef58842d1769e782fe06ed16cf3019d8e65477ca7a688f5b1c5",
+      "raw_final_experiment_rc": 1,
+      "post_run_adjudication": "pass: the only severe-log match was the XDMA module timeout-parameter report; the corrected filter returned zero matches"
     }
   },
   "physical_baseline": {
-    "date": "2026-09-14",
+    "date": "2026-09-16",
     "setups": 1,
     "host": "ASUS ROG Flow Z13",
     "os": "Ubuntu 24.04.5 LTS Persistent Live USB",
@@ -91,8 +92,8 @@
     "secure_boot": "enabled",
     "endpoint": "10ee:7024",
     "subsystem": "10ee:0007",
-    "result": "enumeration, driver binding, DMA comparison, extended DDR tests, and cleanup passed",
-    "scope_note": "This baseline predates the repository-local FPGA generator and does not qualify its newly generated bitstream."
+    "result": "exact repository bitstream, enumeration, driver binding, basic and concurrent DMA, full 4 GiB chunked comparison, AER/path stability, and cleanup passed",
+    "scope_note": "The raw wrapper returned 1 only because its final regex treated the XDMA module timeout-parameter report as an error; the returned evidence was hash-verified and the corrected filter produced zero severe matches."
   },
   "xdma_driver": {
     "upstream": "https://github.com/Xilinx/dma_ip_drivers",
@@ -110,6 +111,8 @@
     ],
     "alias_4g": "five distinct 1 MiB sentinels passed",
     "chunked_1g": "sixteen 64 MiB chunks passed, covering the first 1 GiB",
+    "full_4g": "sixty-four 64 MiB chunks passed, covering all 4294967296 bytes",
+    "concurrent_dma": "channels 0 and 1 each passed a simultaneous 64 MiB write/read comparison",
     "single_request_1g": "not validated; historical C2H ended with rc 137 and no compare result"
   },
   "excluded_from_publication": [

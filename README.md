@@ -11,9 +11,9 @@ board marking and revision will be frozen with the final wiring/BOM record.
 
 > **Project status:** pre-publication `v0.1.0-lab`. The complete FPGA build
 > inputs live under `fpga/` and build directly from `fpga/build.tcl`.
-> A clean Vivado 2026.1 build has passed; its exact bitstream still needs a
-> physical regression on the validated board. The final power/JTAG wiring figure is also
-> pending. No public push should be made until every release blocker in
+> A clean Vivado 2026.1 build and the matching exact-bitstream physical
+> regression have passed. The final power/JTAG wiring figure is still pending.
+> No public push should be made until every release blocker in
 > `docs/OPEN_ITEMS.zh-CN.md` is closed.
 
 ## What this repository provides
@@ -47,20 +47,18 @@ flowchart LR
     I --> D[4 GiB DDR3]
 ```
 
-The completed laboratory campaign enumerated the endpoint as `10ee:7024` with
-subsystem `10ee:0007`, built and loaded XDMA v2025.2.0 with Secure Boot kept
-enabled, and completed basic and extended DDR round trips. Those records prove
-the hardware path used in that campaign. They do not yet prove the new image
-generated from the repository-local FPGA sources; that exact-image regression
-is the remaining FPGA release gate.
+The exact repository-built image enumerated as `10ee:7024` with subsystem
+`10ee:0007`, built and loaded XDMA v2025.2.0 with Secure Boot kept enabled, and
+completed basic, concurrent, and full-address-space DDR round trips. The tested
+bitstream SHA-256 exactly matches the clean-build evidence.
 
 ## Results at a glance
 
 | Gate | Current evidence |
 |---|---|
 | Repository FPGA source | Complete inputs are stored under `fpga/`; the entry point is `fpga/build.tcl` |
-| New repository image | Clean Vivado 2026.1 build passed; exact-bitstream physical regression pending |
-| Earlier laboratory JTAG configuration | XC7K325T SRAM programming completed; no configuration-flash write |
+| Repository image | Clean Vivado 2026.1 build and matching exact-bitstream physical regression passed |
+| JTAG configuration | XC7K325T SRAM programming completed; no configuration-flash write |
 | PCIe enumeration | Exactly one `10ee:7024`, subsystem `10ee:0007` endpoint |
 | XDMA build | Driver v2025.2.0 built for `7.0.0-31-generic` |
 | Secure Boot | Remained enabled; a locally signed module was accepted after MOK enrollment |
@@ -68,17 +66,20 @@ is the remaining FPGA release gate.
 | Basic DMA | 4 KiB ch0, 1 MiB ch0, 1 MiB ch1, and an independent 64 MiB run matched byte for byte |
 | 4 GiB addressing | Five distinct 1 MiB sentinels at 0, 1, 2, 3 GiB and `0xFFF00000` matched |
 | First 1 GiB | 16 × 64 MiB written, read, and compared successfully |
+| Concurrent DMA | Channels 0 and 1 simultaneously transferred and compared 64 MiB each |
+| Full 4 GiB | 64 × 64 MiB written, read, and compared; 64/64 chunks matched |
 | Cleanup | Module unloaded and `/dev/xdma*` nodes disappeared |
 
 The clean build completed with DRC Error 0, setup WNS `+0.038 ns`, hold WHS
 `+0.014 ns`, and 10/10 bus-skew constraints passing. Its bitstream SHA-256 is
 `287f0ff1e9a0bef58842d1769e782fe06ed16cf3019d8e65477ca7a688f5b1c5`;
-the bitstream is kept outside Git until the matching physical regression is
-complete. See the [sanitized build evidence](evidence/validated_repository_clean_build_vivado_2026_1_sanitized.log).
+the bitstream remains outside Git, while the same hash links its clean build,
+JTAG report, and physical run. See the [sanitized build evidence](evidence/validated_repository_clean_build_vivado_2026_1_sanitized.log)
+and [physical evidence](evidence/validated_repository_exact_image_physical_regression_sanitized.log).
 
-The five sentinels detect gross aliasing at the sampled windows; they are not
-a byte scan of all 4 GiB. The first 1 GiB result covers every byte in that range
-through sixteen requests. A single monolithic 1 GiB request was not validated.
+The five sentinels independently check selected high-address windows. The final
+run also covered all 4 GiB with 64 requests of 64 MiB each. A single monolithic
+1 GiB request was not validated and remains intentionally excluded.
 
 ## Quick start
 

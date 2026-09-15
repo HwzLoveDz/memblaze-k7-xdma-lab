@@ -136,9 +136,11 @@ fi
 readonly script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly kit_root="$(cd -- "$script_dir/.." && pwd)"
 readonly dmesg_helper="$script_dir/lib/dmesg_capture.sh"
+readonly kernel_error_filter="$script_dir/lib/kernel_error_filter.sh"
 readonly manifest="$kit_root/RELEASE_MANIFEST.json"
 readonly validator="$kit_root/tools/validate_repo.py"
 readonly kernel_log_contract="$kit_root/tools/test_dmesg_capture.sh"
+readonly kernel_error_contract="$kit_root/tools/test_kernel_error_filter.sh"
 readonly expected_id="10ee:7024"
 readonly expected_subsystem_vendor="0x10ee"
 readonly expected_subsystem_device="0x0007"
@@ -172,10 +174,15 @@ done
 [[ -r "$manifest" ]] || stop_before_write "release manifest is missing"
 [[ -r "$validator" ]] || stop_before_write "repository validator is missing"
 [[ -r "$dmesg_helper" ]] || stop_before_write "kernel-log helper is missing"
+[[ -r "$kernel_error_filter" ]] || stop_before_write "kernel-error filter is missing"
 [[ -r "$kernel_log_contract" ]] \
     || stop_before_write "kernel-log runtime contract is missing"
+[[ -r "$kernel_error_contract" ]] \
+    || stop_before_write "kernel-error runtime contract is missing"
 # shellcheck source=linux/lib/dmesg_capture.sh
 source "$dmesg_helper" || stop_before_write "kernel-log helper could not be loaded"
+# shellcheck source=linux/lib/kernel_error_filter.sh
+source "$kernel_error_filter" || stop_before_write "kernel-error filter could not be loaded"
 sudo_cmd=(sudo)
 [[ -r "$bitstream" ]] || stop_before_write "bitstream is unreadable: $bitstream"
 [[ -r "$bitstream_sha_file" ]] \
@@ -870,6 +877,8 @@ run_workflow() (
     run_step REPOSITORY_VALIDATE env PYTHONDONTWRITEBYTECODE=1 python3 "$validator"
     run_step KERNEL_LOG_CONTRACT bash "$kernel_log_contract"
     append_summary 'KERNEL_LOG_CONTRACT=PASS'
+    run_step KERNEL_ERROR_CONTRACT bash "$kernel_error_contract"
+    append_summary 'KERNEL_ERROR_CONTRACT=PASS'
 
     [[ ! -d /sys/module/xdma ]] \
         || { printf 'STOP: xdma was already loaded before this workflow\n' >&2; exit 1; }
@@ -1005,7 +1014,19 @@ run_workflow() (
         || { printf 'STOP: advanced release evidence validation failed\n' >&2; exit 1; }
 
     capture_state before_cleanup || { printf 'STOP: pre-cleanup capture failed\n' >&2; exit 1; }
-    readonly final_dmesg="$run_root/before_cleanup_dmesg.txt"
+    final_data_pass=1
+    run_step CLEANUP bash "$script_dir/99_cleanup.sh"
+    cleanup_done=1
+    append_summary 'CLEANUP_STATUS=PASS'
+    [[ ! -d /sys/module/xdma ]] || { printf 'STOP: xdma remains loaded after cleanup\n' >&2; exit 1; }
+    if compgen -G '/dev/xdma*' >/dev/null; then
+        printf 'STOP: XDMA nodes remain after cleanup\n' >&2
+        exit 1
+    fi
+
+    capture_state after_cleanup_gate \
+        || { printf 'STOP: post-cleanup capture failed\n' >&2; exit 1; }
+    readonly final_dmesg="$run_root/after_cleanup_gate_dmesg.txt"
     final_dmesg_lines="$(wc -l < "$final_dmesg")"
     if (( initial_dmesg_lines > 0 )); then
         if (( final_dmesg_lines < initial_dmesg_lines )) \
@@ -1016,9 +1037,11 @@ run_workflow() (
         fi
     fi
     tail -n "+$((initial_dmesg_lines + 1))" "$final_dmesg" > "$run_root/full_session_dmesg_delta.txt"
-    severe_kernel_messages="$(grep -Ei \
-        'PCIe Bus Error|AER:.*(corrected|uncorrected|fatal).*error|page allocation failure|BUG:|Oops:|kernel panic|Call Trace:|xdma.*(timeout|failed|error)|Buffer I/O error|JBD2:.*error|Remounting filesystem read-only|attempt to access beyond end of device' \
-        "$run_root/full_session_dmesg_delta.txt" || true)"
+    if ! severe_kernel_messages="$(memblaze_filter_severe_kernel_messages \
+        "$run_root/full_session_dmesg_delta.txt")"; then
+        printf 'STOP: severe-kernel-message filter failed\n' >&2
+        exit 1
+    fi
     if [[ -n "$severe_kernel_messages" ]]; then
         printf '%s\n' "$severe_kernel_messages" > "$run_root/severe_kernel_messages.txt"
         printf 'STOP: severe kernel messages appeared during the session\n' >&2
@@ -1027,15 +1050,6 @@ run_workflow() (
     : > "$run_root/severe_kernel_messages.txt"
     append_summary 'NEW_SEVERE_KERNEL_MESSAGES=none'
 
-    final_data_pass=1
-    run_step CLEANUP bash "$script_dir/99_cleanup.sh"
-    cleanup_done=1
-    append_summary 'CLEANUP_STATUS=PASS'
-    [[ ! -d /sys/module/xdma ]] || { printf 'STOP: xdma remains loaded after cleanup\n' >&2; exit 1; }
-    if compgen -G '/dev/xdma*' >/dev/null; then
-        printf 'STOP: XDMA nodes remain after cleanup\n' >&2
-        exit 1
-    fi
     workflow_complete=1
     append_summary 'EXACT_IMAGE_PHYSICAL_REGRESSION=PASS'
     printf '\nPASS: exact-image physical regression and cleanup completed.\n'

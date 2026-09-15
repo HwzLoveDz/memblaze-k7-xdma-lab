@@ -35,15 +35,18 @@ All notable changes to this project will be documented here.
   previous wrapper parsed and shifted all arguments before restarting itself,
   so the protected run stopped at its confirmation gate. A runtime regression
   test now captures and compares every re-exec argument.
+- Excluded the XDMA module's informational `timeout: h2c ... c2h ...` parameter
+  line from the final severe-kernel-message gate. Real XDMA timeout, failure,
+  error, AER, allocation, and storage messages remain fatal and are covered by
+  a runtime filter test. The final scan now runs after mandatory driver cleanup,
+  and a filter read/error failure also fails the workflow.
 
 ### Release blockers
 
-- Run the exact clean-build bitstream through JTAG, enumeration, driver, DMA, extended
-  DDR, and cleanup gates on the validated board.
-- Add and review the original hardware wiring figure, including the measured
-  power-source isolation/backfeed boundary.
-- Add the physical-regression evidence, update the manifest, then generate and
-  verify `SHA256SUMS.txt`.
+- Add and review the original hardware wiring figure, complete physical BOM,
+  and measured power-source isolation/backfeed boundary.
+- After those physical records are complete, refresh the evidence and manifest,
+  regenerate `SHA256SUMS.txt`, and run the strict release validator.
 
 ### Known limits
 

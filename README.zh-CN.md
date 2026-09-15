@@ -10,9 +10,8 @@
 [待办与边界](docs/OPEN_ITEMS.zh-CN.md)
 
 > **当前状态：** 发布前 `v0.1.0-lab`。完整 FPGA 构建输入位于 `fpga/`，
-> 入口为 `fpga/build.tcl`。Vivado 2026.1 干净构建已经通过；生成的
-> bitstream 仍需在当前实板
-> 完成一次精确映像回归，供电/JTAG 接线图也尚未完成。
+> 入口为 `fpga/build.tcl`。Vivado 2026.1 干净构建和同一 bitstream 的
+> 精确映像实机回归均已通过；供电/JTAG 接线图尚未完成。
 > `docs/OPEN_ITEMS.zh-CN.md` 中的发布阻塞项全部关闭后再公开推送。
 
 ## 仓库包含什么
@@ -40,18 +39,18 @@ x86-64 主机 / 原生 Ubuntu
               └─ XDMA → AXI Interconnect → 4 GiB DDR3
 ```
 
-已完成的实验中，端点枚举为 `10ee:7024`，Subsystem 为 `10ee:0007`；
-Secure Boot 保持开启，XDMA v2025.2.0 完成构建、签名、加载和 DDR 数据闭环。
-这些记录证明了当时使用的主板和主机路径。仓库内新 FPGA 源生成的确切映像
-还没有完成同一套实机回归，因此目前不把旧实验直接算作新映像验收。
+仓库构建的确切映像枚举为 `10ee:7024`，Subsystem 为 `10ee:0007`；
+Secure Boot 保持开启，XDMA v2025.2.0 完成构建、签名、加载、基础与并发 DMA，
+并对完整 4 GiB DDR 做了分块数据闭环。实机使用的 bitstream SHA-256 与干净
+构建证据完全一致。
 
 ## 当前证据
 
 | 层级 | 当前结论 |
 |---|---|
 | 仓库 FPGA 源 | 完整构建输入位于 `fpga/`，入口为 `fpga/build.tcl` |
-| 仓库新映像 | Vivado 2026.1 干净构建通过；确切 bitstream 实机回归待完成 |
-| 既有 JTAG 实验 | XC7K325T 易失 SRAM 配置成功；没有写 configuration flash |
+| 仓库映像 | Vivado 2026.1 干净构建和同一 bitstream 的实机回归均通过 |
+| JTAG | XC7K325T 易失 SRAM 配置成功；没有写 configuration flash |
 | PCIe | 唯一 `10ee:7024`、Subsystem `10ee:0007` 端点被枚举 |
 | 驱动构建 | XDMA v2025.2.0 在 `7.0.0-31-generic` 上构建成功 |
 | Secure Boot | 保持开启；MOK 注册后的本地签名模块被内核接受 |
@@ -59,17 +58,19 @@ Secure Boot 保持开启，XDMA v2025.2.0 完成构建、签名、加载和 DDR 
 | 基础 DMA | 4 KiB ch0、1 MiB ch0、1 MiB ch1 和独立 64 MiB 均逐字节一致 |
 | 4 GiB 寻址 | 0、1、2、3 GiB 和 `0xFFF00000` 的五个不同哨兵均一致 |
 | 前 1 GiB | 16 × 64 MiB 分块写入、回读和比较全部通过 |
+| 双通道并发 | channel 0/1 各 64 MiB 同时传输并分别比较通过 |
+| 完整 4 GiB | 64 × 64 MiB 分块写入、回读和比较，64/64 块一致 |
 | 清理 | 模块卸载，`/dev/xdma*` 节点消失 |
 
 干净构建结果为 DRC Error 0、setup WNS `+0.038 ns`、hold WHS
 `+0.014 ns`，10 条 bus-skew 约束全部通过。bitstream SHA-256 为
 `287f0ff1e9a0bef58842d1769e782fe06ed16cf3019d8e65477ca7a688f5b1c5`；
-完成同一文件的实机回归前，bitstream 保留在 Git 之外。详细记录见
-[脱敏构建证据](evidence/validated_repository_clean_build_vivado_2026_1_sanitized.log)。
+bitstream 本体继续保留在 Git 之外，相同哈希已贯穿干净构建、JTAG 报告和实机
+回归。详细记录见[脱敏构建证据](evidence/validated_repository_clean_build_vivado_2026_1_sanitized.log)
+和[实机证据](evidence/validated_repository_exact_image_physical_regression_sanitized.log)。
 
-五个哨兵用于发现采样窗口上的明显地址回卷或镜像，不等于逐字节扫描完整
-4 GiB。前 1 GiB 的每个字节均被 16 个 64 MiB 请求覆盖；单次 1 GiB 请求
-没有验证通过。
+五个哨兵独立检查高地址窗口；最终实验又用 64 个 64 MiB 请求覆盖完整 4 GiB。
+单次 1 GiB 请求仍未验证通过，因此公开流程继续限制单请求不超过 64 MiB。
 
 ## 上手顺序
 

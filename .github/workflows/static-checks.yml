@@ -27,5 +27,7 @@ jobs:
         run: bash tools/test_dmesg_capture.sh
       - name: Exact-wrapper re-exec contract
         run: bash tools/test_exact_wrapper_reexec.sh
+      - name: Kernel-error filter contract
+        run: bash tools/test_kernel_error_filter.sh
       - name: Python syntax
         run: python3 -m py_compile tools/*.py

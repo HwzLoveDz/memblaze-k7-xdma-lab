@@ -23,9 +23,11 @@ The adapter's auxiliary 12 V input is fed by a dedicated USB-C PD source through
 a PD trigger module configured to negotiate 12 V in this setup. The
 Thunderbolt/USB4 M.2 enclosure supplies 3.3 V through the M.2 slot. Both rails
 were stable before JTAG configuration and stayed powered from Windows through
-the host reboot and Ubuntu regression. This does not claim measured reverse
-current or single-source behavior between the two sources; do not hot-plug the
-card-side wiring or infer polarity from wire color.
+the host reboot and Ubuntu regression. The 12 V and 3.3 V power rails are fully
+isolated in the board's power distribution and do not backfeed. The board's
+high-speed FPGA bank voltage is determined by the PCIe input side. This does
+not make the card-side wiring hot-pluggable; do not infer polarity from wire
+color.
 
 ## Physical setup
 
@@ -109,8 +111,8 @@ run also covered all 4 GiB with 64 requests of 64 MiB each. A single monolithic
 
 Read [the hardware setup](docs/HARDWARE_SETUP.zh-CN.md) and inspect the
 [connection topology](docs/images/wiring-overview.svg) before applying power.
-Do not infer 12 V polarity, source behavior, or JTAG direction from connector
-shape or wire color. The public repository does not yet contain a verified
+Do not infer 12 V polarity or JTAG direction from connector shape or wire
+color. The public repository does not yet contain a verified
 Pin 1/Vref/TCK/TMS/TDI/TDO table. Items explicitly marked as unmeasured must be
 checked on the reproducer's own hardware.
 

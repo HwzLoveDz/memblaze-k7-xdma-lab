@@ -26,9 +26,11 @@ All notable changes to this project will be documented here.
   canonical wiring figure covering PCIe, M.2 3.3 V, PD-triggered 12 V, and
   JTAG paths.
 - The exact dual-source power topology and the successful keep-powered
-  Windows-to-Ubuntu sequence, with auxiliary connector, ground continuity,
-  reverse-current, single-source, current, and pin-table boundaries stated
-  explicitly.
+  Windows-to-Ubuntu sequence. The 12 V and 3.3 V rails are recorded as fully
+  isolated in the board's power distribution with no backfeed, and the
+  high-speed FPGA bank voltage as determined by the PCIe input side; remaining
+  connector, current, and pin-table boundaries are
+  stated explicitly.
 
 ### Fixed
 
@@ -61,6 +63,6 @@ All notable changes to this project will be documented here.
 - A single monolithic 1 GiB DMA request was not validated; the public flow uses
   requests no larger than 64 MiB.
 - The exact enclosure bridge, adapter revision, auxiliary connector pinout,
-  PD/line current ratings, ground continuity, reverse-current and single-source
-  behavior, and public JTAG pin table remain unknown; the release only claims
-  the pictured and physically tested combination.
+  PD/line current ratings, hot-plug behavior, and public JTAG pin table remain
+  unknown; the release only claims the pictured and physically tested
+  combination.

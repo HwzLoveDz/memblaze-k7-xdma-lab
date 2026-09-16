@@ -99,7 +99,7 @@
     "status": "documented-with-known-limits",
     "wiring_figure": {
       "path": "docs/images/wiring-overview.svg",
-      "sha256": "8aedfca73cfee31a10b885dfe4b220f96a9cf666d78896a9dedbbe658825dbf1"
+      "sha256": "84476f44f352958caefcadfc54be119baa3750f40e1bc846a1d58f8385c48aea"
     },
     "photos": {
       "parts": {
@@ -118,8 +118,10 @@
     "power_topology": {
       "pcie_and_3v3": "Thunderbolt/USB4 M.2 enclosure -> M.2 slot -> M.2-to-PCIe adapter -> board PCIe and 3.3 V rails",
       "12v": "dedicated USB-C PD source -> trigger module configured and negotiated to 12 V -> adapter auxiliary +12 V and return/GND input -> board PCIe 12 V input rail",
-      "validated_sequence": "both rails were stable before Windows JTAG SRAM programming and remained present through host reboot and the native-Ubuntu RC4 regression; relative rail order was not isolated",
-      "unmeasured_boundary": "auxiliary connector pinout/polarity, powered-off ground continuity, reverse current, single-source power states, current ratings, and startup/steady current were not publicly measured; hot-plug operation is not claimed"
+      "validated_sequence": "both rails were stable before Windows JTAG SRAM programming and remained present through host reboot and the native-Ubuntu RC4 regression",
+      "rail_relationship": "the 12 V and 3.3 V power rails are fully isolated in the board's power distribution and do not backfeed",
+      "high_speed_bank_voltage": "determined by the PCIe input side, not by the auxiliary 12 V path",
+      "unmeasured_boundary": "auxiliary connector pinout/polarity, current ratings, startup/steady current, and hot-plug behavior were not publicly recorded"
     },
     "identified_components": {
       "host": "ASUS ROG Flow Z13",

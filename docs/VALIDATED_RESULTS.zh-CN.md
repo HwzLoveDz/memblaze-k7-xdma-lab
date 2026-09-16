@@ -123,8 +123,10 @@ ASMedia/Thunderbolt 字段中仍出现 2.5 GT/s ×1。该字段组合与工具�
 - 没有验证 configuration flash 或自动上电配置；完全断电后仍需 JTAG；
 - W26 功能未知，不作为顶层端口，配置后保持 `Pullnone` 和外部高阻；
 - 本次连接和实物组合见[硬件连接](HARDWARE_SETUP.zh-CN.md)与
-  [`wiring-overview.svg`](images/wiring-overview.svg)；反向电流、单路供电、电流数据、
-  JTAG 逐针表和无法从照片确认的料号仍属于公开已知边界。
+  [`wiring-overview.svg`](images/wiring-overview.svg)。12 V 与 3.3 V 供电轨已确认
+  在板上供电分配中完全隔离且不会回灌，高速 Bank 电压由 PCIe 输入侧决定；
+  电流数据、辅助接口
+  逐针定义、JTAG 逐针表和无法从照片确认的料号仍属于公开已知边界。
 
 完整未脱敏归档只保存在本地分析目录，不进入公开仓库；公开证据不包含个人
 路径、USB/JTAG 序列号、MOK 标识、私钥或 DMA payload。

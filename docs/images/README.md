@@ -23,8 +23,11 @@ The wiring figure records the user-confirmed topology:
   from Windows through the reboot and Ubuntu regression;
 - J1–J4 remain externally undriven and W26 remains high-impedance.
 
-The figure deliberately does not claim the auxiliary connector pinout,
-powered-off ground continuity, reverse-current or single-source behavior,
-current limits, or a public JTAG pin table. Those limits are described in
-`docs/HARDWARE_SETUP.zh-CN.md`; a diagram is not a substitute for powered-off
-continuity, polarity, and rail-routing checks on another adapter revision.
+The 12 V and 3.3 V power rails are confirmed fully isolated in the board's
+power distribution with no backfeed, and the board's high-speed FPGA bank
+voltage is determined by the PCIe input side. The figure deliberately does not
+claim the auxiliary connector pinout, current limits, hot-plug capability, or
+a public JTAG pin table. Those
+limits are described in `docs/HARDWARE_SETUP.zh-CN.md`; a diagram is not a
+substitute for powered-off polarity and rail-routing checks on another adapter
+revision.

@@ -8,7 +8,7 @@ sanitized photographs:
 | `wiring-overview.svg` | Data, 3.3 V, 12 V, and JTAG topology |
 | `hardware-parts-overview.jpg` | Powered-off overview of the physical parts used |
 | `xdma-debug-session.jpg` | Native-Ubuntu 64 MiB chunked C2H readback and comparison in progress |
-| `hardware-running.jpg` | Powered temporary test fixture; background device identifiers are redacted |
+| `hardware-running.jpg` | Powered test setup; background device identifiers are redacted |
 
 The JPEG files were re-encoded without EXIF metadata.
 

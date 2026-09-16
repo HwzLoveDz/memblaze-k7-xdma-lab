@@ -8,9 +8,9 @@ Windows 可以完成以下工作：
 - Hardware Manager 通过 JTAG 写 FPGA 易失配置 SRAM；
 - 设备管理器或 PCI 工具确认 FPGA endpoint 是否被枚举。
 
-既有实验已经在 Windows 完成 JTAG SRAM 下载和 endpoint 枚举，但没有完成
-Windows XDMA 驱动绑定及 H2C/C2H 数据闭环。仓库新生成的确切 bitstream
-仍需完成本机实板回归，因此当前也不能把旧 JTAG 结果当成新映像验收。
+Windows 已经完成 JTAG SRAM 下载和 endpoint 枚举；同一个仓库 bitstream
+随后在原生 Ubuntu 完成了 XDMA H2C/C2H 和完整 4 GiB DDR3 数据闭环。
+Windows XDMA 数据面还没有测试。
 
 AMD 的 Answer Record 指向两套不同资源：
 
@@ -20,8 +20,8 @@ AMD 的 Answer Record 指向两套不同资源：
   只支持 x86 平台。
 
 Windows 侧若没有与硬件 ID、系统版本、签名策略匹配的驱动，endpoint 即使
-出现在设备管理器中，也不会自动产生可用 DMA 通道。来源不明的内核驱动
-不适合作为公开教程的默认路径。
+出现在设备管理器中，也不会自动产生可用 DMA 通道。这次公开数据测试使用
+仓库中可直接构建的 Linux 驱动。
 
 ## 普通 WSL2
 
@@ -39,7 +39,7 @@ endpoint 变成 WSL 可绑定设备。
 
 ## 为什么本项目使用原生 Ubuntu
 
-原生 Ubuntu 给出了同一条可审计链：
+在原生 Ubuntu 里，我按下面的顺序把整条数据路径跑了一遍：
 
 1. `lspci` 证明 endpoint 枚举；
 2. 固定 commit 的公开源码现场构建；
@@ -48,5 +48,5 @@ endpoint 变成 WSL 可绑定设备。
 5. H2C 写入、C2H 回读、SHA-256 与 `cmp` 证明数据一致；
 6. `dmesg` 前后比较和独立卸载完成收尾。
 
-这不表示 Windows 天生不能运行 XDMA。它只说明在当前可获得驱动、可审计性
-和复刻成本下，原生 Linux 是这份公开实验更合适的默认路线。
+如果后续拿到匹配且已签名的 Windows 驱动，可以再单独补 Windows DMA。
+目前这套公开流程使用原生 Ubuntu。

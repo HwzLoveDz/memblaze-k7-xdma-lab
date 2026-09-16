@@ -1,41 +1,37 @@
-# 2026-09-16 精确映像实机验证结果
+# 这次实机测试跑到了什么程度
 
 ## 结论
 
-仓库内 Vivado 2026.1 生成流已经完成干净构建，生成 bitstream 的 SHA-256 为：
+我用仓库里的 Vivado 2026.1 生成流做了一次干净构建，得到的 bitstream
+SHA-256 为：
 
 ```text
 287f0ff1e9a0bef58842d1769e782fe06ed16cf3019d8e65477ca7a688f5b1c5
 ```
 
-同一文件随后通过 JTAG 写入 XC7K325T 易失 SRAM，并在保持 PD 诱骗 12 V 与
-M.2 插槽 3.3 V 两路供电的情况下进入 Ubuntu。RC4 实机完成 PCIe 枚举、XDMA
-全新构建/签名/加载、基础
-DMA、双通道 DMA、`alias-4g`、`chunked-1g`、完整 4 GiB 分块数据比较、
-PCIe/AER 检查和清理，原生返回 `FINAL_EXPERIMENT_RC=0`。构建、JTAG 和实机
-证据中的 bitstream 哈希完全一致。
+我把同一个文件通过 JTAG 写入 XC7K325T 易失 SRAM，再保持 12 V 和 3.3 V
+供电重启到 Ubuntu。最终测试跑完 PCIe 枚举、XDMA 构建/签名/加载、基础 DMA、
+双通道 DMA、`alias-4g`、`chunked-1g`、完整 4 GiB 分块比较、PCIe/AER 检查
+和清理，返回 `FINAL_EXPERIMENT_RC=0`。构建、JTAG 和实机使用的是同一个
+bitstream 哈希。
 
 固定名脱敏证据为
 [`validated_repository_exact_image_physical_regression_sanitized.log`](../evidence/validated_repository_exact_image_physical_regression_sanitized.log)。
 
-## RC4 证据完整性
+## 一次日志误报
 
-返回的精确证据归档和 transport 归档均与各自 SHA-256 sidecar 一致。精确
-归档内的 `evidence_files.sha256` 含 100 条唯一记录，逐项校验全部通过；最终
-`severe_kernel_messages.txt` 为空。严重消息过滤器的运行时合约在加载 DMA 前
-执行并通过，最终扫描在驱动清理后执行，因此也覆盖卸载阶段。
-
-上一版规则曾把驱动加载时的正常参数信息误判为失败：
+调试过程中，旧版脚本曾把驱动加载时的正常参数信息当成失败：
 
 ```text
 xdma:xdma_mod_init: desc_blen_max: 0xfffffff/268435455, timeout: h2c 10 c2h 10 sec.
 ```
 
-该行只表示 H2C/C2H 超时参数均设为 10 秒。RC4 的过滤器只排除这条格式固定的
-参数行，真正的 `timed out`、`timeout`、`failed`、`error`、AER、页分配和
-存储错误仍会使实验失败。本次无需人工裁定或事后改写结果。
+这行只表示 H2C/C2H 超时参数都是 10 秒。我把过滤器改成只排除这条固定格式，
+真正的 `timed out`、`timeout`、`failed`、`error`、AER、页分配和存储错误仍会
+触发失败。最终归档里的 100 个文件都通过 SHA-256 校验，清理后的严重内核消息
+为 0。
 
-## 构建与实机条件
+## 这次用的环境
 
 | 项目 | 实测条件 |
 |---|---|
@@ -47,15 +43,12 @@ xdma:xdma_mod_init: desc_blen_max: 0xfffffff/268435455, timeout: h2c 10 c2h 10 s
 | 活动 BAR0 | 64 KiB，由本轮 `lspci -vv` 与 sysfs resource 计算得到 |
 | XDMA 驱动 | 2025.2.0，固定源码提交 `b8466090` |
 | Secure Boot | Enabled，已注册 MOK 签名的模块被内核接受 |
-| 存储边界 | Windows NVMe、EFI、BitLocker 分区均未挂载；无 swap |
 
 干净构建同时得到 DRC Error 0、setup WNS `+0.038 ns`、hold WHS
 `+0.014 ns`、10 条 bus-skew 约束全部通过。构建证据见
 [`validated_repository_clean_build_vivado_2026_1_sanitized.log`](../evidence/validated_repository_clean_build_vivado_2026_1_sanitized.log)。
 
-## 分层结果
-
-这些门彼此独立，不能互相代替：
+## 实际测试结果
 
 | 层级 | 结果 |
 |---|---|
@@ -88,8 +81,8 @@ xdma:xdma_mod_init: desc_blen_max: 0xfffffff/268435455, timeout: h2c 10 c2h 10 s
 每块先记录期望 SHA-256，再回读并比较，64/64 一致。单个 DMA 请求始终不超过
 64 MiB。
 
-历史上的单次 1 GiB 请求仍未验证：其 C2H 以 137 结束且没有 compare 结果。
-它不影响本次分块完整覆盖结论，也不能被写成“单次 1 GiB 已通过”。
+我也试过一次性发起 1 GiB 请求，C2H 最后以 137 结束，没有进入 compare。
+所以正式脚本改用 64 MiB 分块；前 1 GiB 和完整 4 GiB 都已经用分块方式通过。
 
 ## 双通道、链路与计时
 
@@ -104,27 +97,21 @@ C2H1=0x1fc10106
 
 双通道各 64 MiB 并发时，工具墙钟汇总值为 H2C 770.408 MiB/s、C2H
 794.334 MiB/s。完整 4 GiB 分块墙钟值为 H2C 641.454 MiB/s、C2H
-624.475 MiB/s。它们是用户态工具/请求计时，不直接等于 PCIe 链路净吞吐。
+624.475 MiB/s。这些数字来自用户态工具和请求计时。
 
-从精确工作流 run ID 到清理结果目录约 64.53 秒；其中 XDMA 从加载到卸载约
-55.07 秒。日志同时证明旧构建树先被移走，驱动和用户态工具均在本轮重新构建，
-没有复用旧 DMA 结果。所有阶段合计每个方向实际传输 5,644,488,704 字节，
+整套流程从创建 run ID 到写出清理结果约 64.53 秒，其中 XDMA 从加载到卸载约
+55.07 秒。脚本先移走旧构建树，再重新构建驱动和用户态工具。所有阶段合计
+每个方向实际传输 5,644,488,704 字节，
 双向合计约 10.51 GiB。
 
 同一轮 `lspci` 报告 endpoint 能力为 Gen2 ×8，当前为 Gen2 ×4；上游
-ASMedia/Thunderbolt 字段中仍出现 2.5 GT/s ×1。该字段组合与工具计时不自洽，
-所以本仓库保留两组原始含义，不据此宣称峰值 PCIe 性能或桥接器真实瓶颈。
+ASMedia/Thunderbolt 字段中仍出现 2.5 GT/s ×1。两组信息并不自洽，我把原始
+读数都保留了；要测清真实链路上限，下一步可以换原生 PCIe 主机再跑。
 
-## 仍未覆盖的范围
+## 我还没做的测试
 
-- 没有验证单请求 1 GiB；
 - 没有完成数小时温度、功耗、AER、掉电与反复重枚举循环；
 - 没有完成 Windows XDMA 数据闭环；
 - 没有验证 configuration flash 或自动上电配置；完全断电后仍需 JTAG；
 - W26 功能未知，不作为顶层端口，配置后保持 `Pullnone` 和外部高阻；
-- 本次连接和实物组合见[硬件连接](HARDWARE_SETUP.zh-CN.md)与
-  [`wiring-overview.svg`](images/wiring-overview.svg)。12 V 与 3.3 V 供电轨已确认
-  在板上供电分配中完全隔离且不会回灌，高速 Bank 电压由 PCIe 输入侧决定。
-
-完整未脱敏归档只保存在本地分析目录，不进入公开仓库；公开证据不包含个人
-路径、USB/JTAG 序列号、MOK 标识、私钥或 DMA payload。
+- 没有测试 XDMA event 节点和用户中断延迟。

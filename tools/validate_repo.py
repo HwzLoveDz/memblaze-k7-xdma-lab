@@ -46,20 +46,14 @@ REQUIRED = {
     "README.md",
     "README.zh-CN.md",
     "LICENSE",
-    "NOTICE.md",
     "THIRD_PARTY_NOTICES.md",
     "RELEASE_MANIFEST.json",
-    "docs/README.md",
-    "docs/ARCHITECTURE.zh-CN.md",
     "docs/HARDWARE_SETUP.zh-CN.md",
-    "docs/LESSONS_LEARNED.zh-CN.md",
     "docs/NEXT_EXPERIMENTS.zh-CN.md",
-    "docs/OPEN_ITEMS.zh-CN.md",
     "docs/SECURE_BOOT.zh-CN.md",
     "docs/EXACT_IMAGE_REGRESSION.zh-CN.md",
     "docs/TROUBLESHOOTING.zh-CN.md",
     "docs/VALIDATED_RESULTS.zh-CN.md",
-    "docs/WINDOWS_WSL.zh-CN.md",
     "linux/01_probe.sh",
     "linux/02_build_driver.sh",
     "linux/03_secure_boot_status.sh",
@@ -89,14 +83,6 @@ REQUIRED = {
     "LICENSES/Xilinx-XDMA-BSD.txt",
     "evidence/README.md",
     "evidence/historical_single_request_1g_failure_sanitized.log",
-    "evidence/validated_4KiB_ch0_addr0.log",
-    "evidence/validated_64MiB_ch0_addr04000000.log",
-    "evidence/validated_alias_4g_20260914_sanitized.log",
-    "evidence/validated_build_load_cleanup_20260914_sanitized.log",
-    "evidence/validated_chunked_1g_20260914_sanitized.log",
-    "evidence/validated_final_run_20260914_sanitized.log",
-    "evidence/validated_jtag_sram_program_20260914_sanitized.log",
-    "evidence/validated_pcie_path_20260914_sanitized.log",
 }
 
 FORBIDDEN_SUFFIXES = {
@@ -1520,14 +1506,23 @@ def main() -> int:
         }
         if image_paths != expected_images:
             errors.append("hardware_record image paths do not match the public image set")
-        for document, prefix in (
-            (ROOT / "README.md", "docs/images/"),
-            (ROOT / "README.zh-CN.md", "docs/images/"),
-            (ROOT / "docs" / "HARDWARE_SETUP.zh-CN.md", "images/"),
-        ):
+        required_image_references = {
+            ROOT / "README.md": (
+                "docs/images/wiring-overview.svg",
+                "docs/images/xdma-debug-session.jpg",
+            ),
+            ROOT / "README.zh-CN.md": (
+                "docs/images/wiring-overview.svg",
+                "docs/images/xdma-debug-session.jpg",
+            ),
+            ROOT / "docs" / "HARDWARE_SETUP.zh-CN.md": tuple(
+                "images/" + Path(relative).name
+                for relative in expected_images.values()
+            ),
+        }
+        for document, targets in required_image_references.items():
             content = document.read_text(encoding="utf-8")
-            for relative in expected_images.values():
-                target = prefix + Path(relative).name
+            for target in targets:
                 if target not in content:
                     errors.append(
                         f"{document.relative_to(ROOT).as_posix()} does not reference {target}"

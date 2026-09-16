@@ -18,19 +18,6 @@ bitstream 哈希。
 固定名脱敏证据为
 [`validated_repository_exact_image_physical_regression_sanitized.log`](../evidence/validated_repository_exact_image_physical_regression_sanitized.log)。
 
-## 一次日志误报
-
-调试过程中，旧版脚本曾把驱动加载时的正常参数信息当成失败：
-
-```text
-xdma:xdma_mod_init: desc_blen_max: 0xfffffff/268435455, timeout: h2c 10 c2h 10 sec.
-```
-
-这行只表示 H2C/C2H 超时参数都是 10 秒。我把过滤器改成只排除这条固定格式，
-真正的 `timed out`、`timeout`、`failed`、`error`、AER、页分配和存储错误仍会
-触发失败。最终归档里的 100 个文件都通过 SHA-256 校验，清理后的严重内核消息
-为 0。
-
 ## 这次用的环境
 
 | 项目 | 实测条件 |
@@ -106,12 +93,5 @@ C2H1=0x1fc10106
 
 同一轮 `lspci` 报告 endpoint 能力为 Gen2 ×8，当前为 Gen2 ×4；上游
 ASMedia/Thunderbolt 字段中仍出现 2.5 GT/s ×1。两组信息并不自洽，我把原始
-读数都保留了；要测清真实链路上限，下一步可以换原生 PCIe 主机再跑。
-
-## 我还没做的测试
-
-- 没有完成数小时温度、功耗、AER、掉电与反复重枚举循环；
-- 没有完成 Windows XDMA 数据闭环；
-- 没有验证 configuration flash 或自动上电配置；完全断电后仍需 JTAG；
-- W26 功能未知，不作为顶层端口，配置后保持 `Pullnone` 和外部高阻；
-- 没有测试 XDMA event 节点和用户中断延迟。
+读数都保留了。链路带宽、Windows DMA、自动配置和长期稳定性实验统一列在
+[`NEXT_EXPERIMENTS.zh-CN.md`](NEXT_EXPERIMENTS.zh-CN.md)。

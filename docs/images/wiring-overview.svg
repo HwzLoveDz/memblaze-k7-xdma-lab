@@ -1,95 +1,176 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940" role="img" aria-labelledby="title desc">
-  <title id="title">Memblaze K7 XDMA connection used in the successful run</title>
-  <desc id="desc">The successful Thunderbolt to M.2 to PCIe data path, M.2-supplied 3.3 volt rail, isolated auxiliary 12 volt plus return path from a USB-C PD trigger, and JTAG configuration.</desc>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+  width="1280"
+  height="720"
+  viewBox="0 0 1280 720"
+  role="img"
+  aria-labelledby="title desc">
+  <title id="title">实测连接拓扑</title>
+  <desc id="desc">ASUS ROG Flow Z13 通过 Thunderbolt 4、UGREEN M.2 外接盒和 M.2 转 PCIe x4 转接板连接 Memblaze XC7K325T 主板；外接盒经转接板提供 3.3 伏，USB-C PD 经诱骗模块提供 12 伏，Platform Cable USB 提供 JTAG。</desc>
+
   <defs>
-    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#2463a8"/></marker>
-    <marker id="arrow-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#c0392b"/></marker>
-    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#268257"/></marker>
-    <marker id="arrow-purple" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#6b4aa0"/></marker>
-    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#17202a" flood-opacity="0.12"/></filter>
+    <filter id="card-shadow" x="-10%" y="-12%" width="120%" height="132%" color-interpolation-filters="sRGB">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="3" result="blur"/>
+      <feOffset in="blur" dy="2" result="offset"/>
+      <feComponentTransfer in="offset" result="shadow">
+        <feFuncA type="linear" slope="0.08"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="shadow"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <marker id="arrow-data" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto-start-reverse">
+      <path d="M 1,1 L 9,5 L 1,9 Z" fill="#2563eb"/>
+    </marker>
+    <marker id="arrow-3v3" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+      <path d="M 1,1 L 9,5 L 1,9 Z" fill="#2e7d66"/>
+    </marker>
+    <marker id="arrow-12v" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+      <path d="M 1,1 L 9,5 L 1,9 Z" fill="#c2410c"/>
+    </marker>
+    <marker id="arrow-jtag" markerUnits="userSpaceOnUse" markerWidth="10" markerHeight="10" refX="8.5" refY="5" orient="auto">
+      <path d="M 1,1 L 9,5 L 1,9 Z" fill="#7c3aed"/>
+    </marker>
+
     <style>
-      .bg { fill: #f7f5f1; }
-      .box { fill: #ffffff; stroke: #cbc5bb; stroke-width: 2; rx: 16; filter: url(#shadow); }
-      .title { font: 700 34px "Segoe UI", "Noto Sans SC", sans-serif; fill: #17191c; }
-      .subtitle { font: 18px "Segoe UI", "Noto Sans SC", sans-serif; fill: #585e66; }
-      .name { font: 700 23px "Segoe UI", "Noto Sans SC", sans-serif; fill: #1c2127; }
-      .text { font: 18px "Segoe UI", "Noto Sans SC", sans-serif; fill: #3d444d; }
-      .small { font: 16px "Segoe UI", "Noto Sans SC", sans-serif; fill: #5c626a; }
-      .wire-label { font: 700 17px "Segoe UI", "Noto Sans SC", sans-serif; paint-order: stroke; stroke: #f7f5f1; stroke-width: 7; stroke-linejoin: round; }
-      .note { fill: #fff8ed; stroke: #d39c46; stroke-width: 2; rx: 14; }
-      .limit { fill: #fff2f0; stroke: #c85d52; stroke-width: 2; rx: 14; }
+      .canvas { fill: #f8fafc; }
+      .eyebrow { font: 600 13px "Segoe UI", "Microsoft YaHei", sans-serif; letter-spacing: 1.6px; fill: #64748b; }
+      .page-title { font: 700 30px "Segoe UI", "Microsoft YaHei", sans-serif; fill: #0f172a; }
+      .card { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; filter: url(#card-shadow); }
+      .card-accent { fill: #2563eb; }
+      .card-kicker { font: 600 12px "Segoe UI", "Microsoft YaHei", sans-serif; letter-spacing: 0.8px; fill: #64748b; }
+      .card-title { font: 700 19px "Segoe UI", "Microsoft YaHei", sans-serif; fill: #0f172a; }
+      .card-body { font: 15px "Segoe UI", "Microsoft YaHei", sans-serif; fill: #475569; }
+      .port-label { font: 600 12px "Segoe UI", "Microsoft YaHei", sans-serif; fill: #64748b; }
+      .rail-label { font: 600 14px "Segoe UI", "Microsoft YaHei", sans-serif; }
+      .legend { font: 13px "Segoe UI", "Microsoft YaHei", sans-serif; fill: #475569; }
+      .data { fill: none; stroke: #2563eb; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+      .power-3v3 { fill: none; stroke: #2e7d66; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+      .power-12v { fill: none; stroke: #c2410c; stroke-width: 3.5; stroke-linecap: round; stroke-linejoin: round; }
+      .jtag { fill: none; stroke: #7c3aed; stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 9 8; }
+      .mini-card { fill: #ffffff; stroke: #d7dee8; stroke-width: 1.5; }
+      .mini-title { font: 700 16px "Segoe UI", "Microsoft YaHei", sans-serif; fill: #0f172a; }
+      .mini-body { font: 14px "Segoe UI", "Microsoft YaHei", sans-serif; fill: #64748b; }
     </style>
   </defs>
-  <rect class="bg" x="0" y="0" width="1600" height="940"/>
 
-  <text class="title" x="70" y="65">Memblaze K7 XDMA 本次成功使用的连接拓扑</text>
-  <text class="subtitle" x="70" y="98">蓝色为 PCIe 数据，绿色为 3.3 V，红色为 12 V，紫色为 JTAG。</text>
+  <g inkscape:groupmode="layer" inkscape:label="Background" id="background">
+    <rect class="canvas" width="1280" height="720"/>
+  </g>
 
-  <rect class="box" x="70" y="170" width="260" height="170"/>
-  <text class="name" x="100" y="220">ASUS ROG Flow Z13</text>
-  <text class="text" x="100" y="258">原生 Ubuntu 24.04.5</text>
-  <text class="text" x="100" y="290">Secure Boot Enabled</text>
-  <text class="small" x="100" y="320">Windows 仅用于 Vivado / JTAG</text>
+  <g inkscape:groupmode="layer" inkscape:label="Header" id="header">
+    <text class="eyebrow" x="52" y="40">MEMBLAZE K7 XDMA LAB</text>
+    <text class="page-title" x="52" y="76">实测连接拓扑</text>
 
-  <rect class="box" x="470" y="170" width="280" height="170"/>
-  <text class="name" x="500" y="220">UGREEN M.2 外接盒</text>
-  <text class="text" x="500" y="258">Thunderbolt / USB4 路径</text>
-  <text class="text" x="500" y="290">M.2 M-Key：PCIe ×4 + 3.3 V</text>
-  <text class="small" x="500" y="320">确切型号与桥芯片未记录</text>
+    <g transform="translate(757,35)">
+      <line x1="0" y1="6" x2="28" y2="6" class="data"/>
+      <text class="legend" x="37" y="11">PCIe 数据</text>
+      <line x1="124" y1="6" x2="152" y2="6" class="power-3v3"/>
+      <text class="legend" x="161" y="11">3.3 V</text>
+      <line x1="230" y1="6" x2="258" y2="6" class="power-12v"/>
+      <text class="legend" x="267" y="11">12 V</text>
+      <line x1="330" y1="6" x2="358" y2="6" class="jtag"/>
+      <text class="legend" x="367" y="11">JTAG</text>
+    </g>
+    <line x1="52" y1="104" x2="1228" y2="104" stroke="#e2e8f0" stroke-width="1"/>
+  </g>
 
-  <rect class="box" x="900" y="170" width="300" height="170"/>
-  <text class="name" x="930" y="220">M.2 M-Key ↔ PCIe ×4</text>
-  <text class="text" x="930" y="258">插槽转接板；板面标 PCIE 4.0</text>
-  <text class="text" x="930" y="290">接收 M.2 3.3 V</text>
-  <text class="text" x="930" y="320">另有辅助 12 V 输入</text>
+  <g inkscape:groupmode="layer" inkscape:label="Connections" id="connections">
+    <!-- Main PCIe path -->
+    <path class="data" d="M 300,234 H 350" marker-start="url(#arrow-data)" marker-end="url(#arrow-data)"/>
+    <path class="data" d="M 600,234 H 650" marker-start="url(#arrow-data)" marker-end="url(#arrow-data)"/>
+    <path class="data" d="M 900,234 H 950" marker-start="url(#arrow-data)" marker-end="url(#arrow-data)"/>
 
-  <rect class="box" x="1280" y="150" width="270" height="210"/>
-  <text class="name" x="1310" y="205">Memblaze 主板</text>
-  <text class="text" x="1310" y="242">XC7K325T / XDMA</text>
-  <text class="text" x="1310" y="274">4 GiB DDR3</text>
-  <text class="text" x="1310" y="306">主动散热</text>
-  <text class="small" x="1310" y="337">J1–J4 未驱动；W26 高阻</text>
+    <!-- 3.3 V enters and leaves through the M.2-to-PCIe adapter -->
+    <path class="power-3v3" d="M 480,322 V 382 H 694 V 322" marker-end="url(#arrow-3v3)"/>
+    <path class="power-3v3" d="M 856,322 V 382 H 1068 V 322" marker-end="url(#arrow-3v3)"/>
 
-  <path d="M330 255 H470" fill="none" stroke="#2463a8" stroke-width="8" marker-end="url(#arrow-blue)"/>
-  <text class="wire-label" x="350" y="238" fill="#2463a8">Thunderbolt 4</text>
-  <path d="M750 255 H900" fill="none" stroke="#2463a8" stroke-width="8" marker-end="url(#arrow-blue)"/>
-  <text class="wire-label" x="773" y="238" fill="#2463a8">PCIe ×4</text>
-  <path d="M1200 255 H1280" fill="none" stroke="#2463a8" stroke-width="8" marker-end="url(#arrow-blue)"/>
+    <!-- Auxiliary 12 V ends at the adapter's dedicated input -->
+    <path class="power-12v" d="M 600,503 H 650" marker-end="url(#arrow-12v)"/>
+    <path class="power-12v" d="M 778,450 V 322" marker-end="url(#arrow-12v)"/>
+    <path class="power-12v" d="M 900,298 H 950" marker-end="url(#arrow-12v)"/>
 
-  <path d="M610 340 V405 H1050 V340" fill="none" stroke="#268257" stroke-width="7" marker-end="url(#arrow-green)"/>
-  <text class="wire-label" x="690" y="394" fill="#268257">M.2 插槽提供 3.3 V</text>
-  <path d="M1200 300 H1280" fill="none" stroke="#268257" stroke-width="7" marker-end="url(#arrow-green)"/>
+    <!-- JTAG stays on its own lower route -->
+    <path class="jtag" d="M 286,615 H 1162 V 322" marker-end="url(#arrow-jtag)"/>
+  </g>
 
-  <rect class="box" x="370" y="520" width="290" height="150"/>
-  <text class="name" x="400" y="570">USB-C PD 电源</text>
-  <text class="text" x="400" y="608">经 PD 协商获得目标电压</text>
+  <g inkscape:groupmode="layer" inkscape:label="Nodes" id="nodes">
+    <!-- Host -->
+    <g id="host-card">
+      <rect class="card" x="50" y="146" width="250" height="176" rx="14"/>
+      <rect class="card-accent" x="50" y="146" width="250" height="5" rx="2.5"/>
+      <text class="card-kicker" x="72" y="178">HOST</text>
+      <text class="card-title" x="72" y="211">ASUS ROG Flow Z13</text>
+      <text class="card-body" x="72" y="253">Thunderbolt 4 主机</text>
+      <text class="card-body" x="72" y="279">运行 XDMA 用户态测试</text>
+    </g>
 
-  <rect class="box" x="790" y="520" width="300" height="150"/>
-  <text class="name" x="820" y="570">USB-C PD 诱骗模块</text>
-  <text class="text" x="820" y="608">本次设定并协商为 12 V</text>
+    <!-- M.2 enclosure -->
+    <g id="enclosure-card">
+      <rect class="card" x="350" y="146" width="250" height="176" rx="14"/>
+      <rect class="card-accent" x="350" y="146" width="250" height="5" rx="2.5"/>
+      <text class="card-kicker" x="372" y="178">PCIe BRIDGE</text>
+      <text class="card-title" x="372" y="211">UGREEN M.2 外接盒</text>
+      <text class="card-body" x="372" y="253">USB4 / M.2 M-Key</text>
+      <text class="card-body" x="372" y="279">PCIe ×4 + 3.3 V 输出</text>
+    </g>
 
-  <path d="M660 595 H790" fill="none" stroke="#c0392b" stroke-width="8" marker-end="url(#arrow-red)"/>
-  <text class="wire-label" x="686" y="578" fill="#c0392b">USB-C</text>
-  <path d="M1090 595 H1145 V340" fill="none" stroke="#c0392b" stroke-width="8" marker-end="url(#arrow-red)"/>
-  <text class="wire-label" x="1075" y="565" fill="#c0392b">+12 V + return/GND</text>
-  <path d="M1200 320 H1280" fill="none" stroke="#c0392b" stroke-width="7" marker-end="url(#arrow-red)"/>
+    <!-- Adapter -->
+    <g id="adapter-card">
+      <rect class="card" x="650" y="146" width="250" height="176" rx="14"/>
+      <rect class="card-accent" x="650" y="146" width="250" height="5" rx="2.5"/>
+      <text class="card-kicker" x="672" y="178">ADAPTER</text>
+      <text class="card-title" x="672" y="211">M.2 → PCIe ×4 转接板</text>
+      <text class="card-body" x="672" y="253">PCIe 信号 + 3.3 V</text>
+      <text class="card-body" x="672" y="279">辅助 12 V 输入</text>
+    </g>
 
-  <rect class="box" x="70" y="520" width="230" height="150"/>
-  <text class="name" x="100" y="570">Platform Cable USB</text>
-  <text class="text" x="100" y="608">Xilinx / 型号 DLC9LP</text>
-  <text class="small" x="100" y="640">转接排线 / JTAG</text>
-  <path d="M300 595 H330 V455 H1415 V360" fill="none" stroke="#6b4aa0" stroke-width="6" stroke-dasharray="14 10" marker-end="url(#arrow-purple)"/>
-  <text class="wire-label" x="620" y="443" fill="#6b4aa0">易失 SRAM 配置</text>
+    <!-- FPGA board -->
+    <g id="fpga-card">
+      <rect class="card" x="950" y="146" width="280" height="176" rx="14"/>
+      <rect class="card-accent" x="950" y="146" width="280" height="5" rx="2.5"/>
+      <text class="card-kicker" x="972" y="178">FPGA ENDPOINT</text>
+      <text class="card-title" x="972" y="211">Memblaze XC7K325T</text>
+      <text class="card-body" x="972" y="253">XDMA PCIe Endpoint</text>
+      <text class="card-body" x="972" y="279">4 GiB DDR3</text>
+    </g>
 
-  <rect class="note" x="70" y="735" width="700" height="140"/>
-  <text class="name" x="100" y="780">本次成功操作顺序</text>
-  <text class="small" x="100" y="815">断电完成连接 → 接通两路供电并确认稳定 → 启动 Windows</text>
-  <text class="small" x="100" y="843">→ JTAG 配置 SRAM → 保持 12 V 与 3.3 V，重启 Ubuntu</text>
-  <text class="small" x="100" y="869">→ 枚举并运行 XDMA</text>
+    <!-- Auxiliary devices -->
+    <g id="pd-source">
+      <rect class="mini-card" x="390" y="450" width="210" height="106" rx="12"/>
+      <rect x="390" y="450" width="5" height="106" rx="2.5" fill="#c2410c"/>
+      <text class="mini-title" x="414" y="487">USB-C PD 电源</text>
+      <text class="mini-body" x="414" y="518">协商输出 12 V</text>
+    </g>
 
-  <rect class="limit" x="820" y="735" width="730" height="140"/>
-  <text class="name" x="850" y="780">电源关系</text>
-  <text class="small" x="850" y="817">• 12 V / 3.3 V 供电轨在板上完全隔离且不会回灌</text>
-  <text class="small" x="850" y="849">• 高速 Bank 电压由 PCIe 输入侧决定，不由辅助 12 V 决定</text>
+    <g id="pd-trigger">
+      <rect class="mini-card" x="650" y="450" width="250" height="106" rx="12"/>
+      <rect x="650" y="450" width="5" height="106" rx="2.5" fill="#c2410c"/>
+      <text class="mini-title" x="674" y="487">PD 诱骗模块</text>
+      <text class="mini-body" x="674" y="518">12 V → 转接板辅助供电</text>
+    </g>
+
+    <g id="jtag-cable">
+      <rect class="mini-card" x="50" y="560" width="236" height="110" rx="12"/>
+      <rect x="50" y="560" width="5" height="110" rx="2.5" fill="#7c3aed"/>
+      <text class="mini-title" x="74" y="598">Platform Cable USB</text>
+      <text class="mini-body" x="74" y="628">DLC9LP / JTAG</text>
+    </g>
+  </g>
+
+  <g inkscape:groupmode="layer" inkscape:label="Labels" id="labels">
+    <text class="port-label" x="325" y="220" text-anchor="middle">TB4</text>
+    <text class="port-label" x="625" y="220" text-anchor="middle">M.2</text>
+    <text class="port-label" x="925" y="220" text-anchor="middle">PCIe</text>
+    <text class="port-label" x="925" y="288" text-anchor="middle" style="fill:#c2410c">12 V</text>
+
+    <text class="rail-label" x="536" y="371" fill="#2e7d66">M.2 3.3 V</text>
+    <text class="rail-label" x="914" y="371" fill="#2e7d66">3.3 V</text>
+    <text class="rail-label" x="828" y="420" fill="#c2410c">辅助 12 V</text>
+    <text class="rail-label" x="1010" y="641" fill="#7c3aed">JTAG</text>
+  </g>
 </svg>

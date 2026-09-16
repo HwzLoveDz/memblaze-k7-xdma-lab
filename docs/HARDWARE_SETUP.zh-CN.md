@@ -23,20 +23,29 @@
 
 ## 实物照片
 
-![本次实验器材总览](images/hardware-parts-overview.jpg)
+<p align="center">
+  <img src="images/hardware-parts-overview.jpg" width="900"
+       alt="本次实验器材总览">
+</p>
 
 从左到右为 Xilinx Platform Cable USB（型号 `DLC9LP`）、带主动散热的
 Memblaze/XC7K325T 主板、
 板面标有 `PCIE 4.0` 的 M.2 M-Key↔PCIe ×4 插槽转接板、UGREEN M.2 外接盒和
 连接线。
 
-![原生 Ubuntu 下进行 XDMA 分块回读与比较](images/xdma-debug-session.jpg)
+<p align="center">
+  <img src="images/xdma-debug-session.jpg" width="900"
+       alt="原生 Ubuntu 下进行 XDMA 分块回读与比较">
+</p>
 
 调试照记录原生 Ubuntu 下的 64 MiB 分块 C2H 回读和 SHA-256 比较过程。最终
 PASS、覆盖范围和速度见 [`VALIDATED_RESULTS.zh-CN.md`](VALIDATED_RESULTS.zh-CN.md)
 及仓库脱敏日志。
 
-![实机通电运行状态](images/hardware-running.jpg)
+<p align="center">
+  <img src="images/hardware-running.jpg" width="900"
+       alt="实机通电运行状态">
+</p>
 
 运行照记录测试期间的实机通电状态，背景设备的唯一标识已脱敏。
 

@@ -7,6 +7,31 @@ regenerates those files in a separate build directory.
 No other FPGA project, external Git commit, DCP, or generated checkpoint is an
 input to this flow.
 
+## Runtime data path
+
+```text
+Linux userspace
+  ↕  /dev/xdma0_h2c_* and /dev/xdma0_c2h_*
+xdma.ko
+  ↕  PCIe / Thunderbolt bridge path
+XDMA endpoint
+  ↕  128-bit AXI memory-mapped master at 250 MHz
+AXI interconnect and generated clock converter
+  ↕  MIG user clock domain
+MIG 7 Series
+  ↕
+4 GiB DDR3
+```
+
+H2C writes travel from host memory through XDMA into the MIG address space;
+C2H reads return along the same path. The FPGA side uses a 64-bit AXI address
+and maps DDR from `0x00000000` through `0xffffffff`.
+
+The generic PF0 BAR0 setting is 128 KiB, non-prefetchable and 32-bit. XDMA's
+configuration aperture inside the core is 64 KiB; these are different values.
+The active BAR resources and negotiated link width/speed come from the host and
+should be read from `lspci -vv` on the machine under test.
+
 ## Requirements
 
 - Windows with AMD Vivado 2026.1

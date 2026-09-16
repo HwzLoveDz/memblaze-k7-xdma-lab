@@ -1,135 +1,33 @@
-# Sanitized validation evidence
+# 实测证据
 
-These files summarize the initial board/host campaign from 2026-09-13/14 and
-the exact repository-image physical regression completed on 2026-09-16.
-Personal paths, emails, USB/JTAG serials, MOK identifiers, and private-key
-material were removed. The original private logs are not part of this
-repository.
+这里保留两份与当前仓库直接对应的脱敏摘要，以及一份解释 64 MiB 分块选择的
+历史负例。个人路径、邮箱、USB/JTAG 序列号、MOK 标识和私钥信息均未进入仓库。
 
-The repository-local FPGA generator has a clean Vivado 2026.1 build record.
-The 2026-09-16 run used the exact matching bitstream and now qualifies that
-image through JTAG, enumeration, driver, DMA, full 4 GiB comparison, kernel/
-PCIe checks, and cleanup.
+| 文件 | 内容 |
+| --- | --- |
+| `validated_repository_clean_build_vivado_2026_1_sanitized.log` | 当前 FPGA 源码在 Vivado 2026.1 下的干净构建、实现检查、source-set hash 和 bitstream hash |
+| `validated_repository_exact_image_physical_regression_sanitized.log` | 同一 bitstream 的 JTAG、PCIe、Secure Boot、XDMA、双通道、完整 4 GiB 数据比较和清理 |
+| `historical_single_request_1g_failure_sanitized.log` | 单次 1 GiB 请求未完成数据比较的边界记录；后续正式流程改用 64 MiB 分块 |
 
-| File | Claim supported |
-|---|---|
-| `validated_repository_clean_build_vivado_2026_1_sanitized.log` | self-contained source build, implementation checks, and bitstream identity |
-| `validated_repository_exact_image_physical_regression_sanitized.log` | RC4 matching bitstream, current BAR, Secure Boot/XDMA, basic and concurrent DMA, full 4 GiB comparison, post-cleanup kernel gate, and cleanup |
-| `validated_jtag_sram_program_20260914_sanitized.log` | volatile XC7K325T configuration completed |
-| `validated_pcie_path_20260914_sanitized.log` | endpoint identity and reported topology fields |
-| `validated_build_load_cleanup_20260914_sanitized.log` | build, MOK acceptance, binding, device nodes, cleanup |
-| `validated_4KiB_ch0_addr0.log` | minimum channel-0 round trip |
-| `validated_64MiB_ch0_addr04000000.log` | independent 64 MiB round trip |
-| `validated_alias_4g_20260914_sanitized.log` | five high-address sentinels |
-| `validated_chunked_1g_20260914_sanitized.log` | first 1 GiB, 16 × 64 MiB coverage |
-| `validated_final_run_20260914_sanitized.log` | final gate summary |
-| `historical_single_request_1g_failure_sanitized.log` | bounded historical negative result |
-| `failed_exact_image_preflight_20260915_sanitized.log` | exact-image launcher compatibility failure before PCIe/DMA, plus the bounded corrective action |
+两份记录使用相同的 bitstream SHA-256：
 
-## Reading the evidence
+```text
+287f0ff1e9a0bef58842d1769e782fe06ed16cf3019d8e65477ca7a688f5b1c5
+```
 
-`PCI_ENUMERATION=PASS` means the endpoint appeared. `XDMA_DRIVER=PASS` means
-the expected driver bound and the required device nodes appeared.
-`DMA_DATA_COMPARE=PASS` or `EXTENDED_DMA_DATA_COMPARE=PASS` means a real
-write/read comparison matched. None of these markers substitutes for another.
+第一份回答“当前源码能否得到这张映像”，第二份回答“这张映像是否在实机完成
+数据闭环”。枚举、驱动绑定和 DMA 数据一致性在第二份记录中分别列出。
 
-The historical 1 GiB log intentionally remains in the set. It shows why the
-public workflow limits individual requests to 64 MiB and avoids claiming that
-a monolithic 1 GiB request passed.
+本次实机回归使用 64 MiB 请求完成：
 
-The 2026-09-15 preflight failure is also retained because it proves why target
-runtime checks are required in addition to source-text validation. That run
-did not test enumeration, driver loading, DMA, or DDR; its transport evidence
-only proves the storage boundary and successful failure-log export.
+- channel 0/1 基础和并发 H2C/C2H 比较；
+- 五个 4 GiB 高地址窗口哨兵；
+- 前 1 GiB 的 16 块连续比较；
+- 完整 4 GiB 的 64 块写入、回读和逐块比较；
+- 测试后的内核错误扫描和 XDMA 清理。
 
-The final 2026-09-16 RC4 exact run completed every hardware, data, kernel-log,
-and cleanup gate with native `FINAL_EXPERIMENT_RC=0`. Both returned archives
-matched their sidecars, and all 100 files listed by the exact archive's
-internal manifest passed SHA-256 verification. Its final severe-message scan
-ran after cleanup and returned zero matches. The filter ignores only the
-fixed-format XDMA timeout-parameter information line while its runtime contract
-retains real timeout, failure, error, AER, allocation, and storage examples.
-
-For any later repository-image physical regression, confirm that the clean
-build's exact bitstream SHA-256 was used for JTAG. Source/build, JTAG,
-enumeration, driver, and DMA remain separate evidence gates.
-
-The release validator requires two new sanitized summaries with fixed names;
-changing only `RELEASE_MANIFEST.json` cannot close the gate:
-
-- `validated_repository_clean_build_vivado_2026_1_sanitized.log` was made
-  from the final clean-build reports and contains these unique machine-readable
-  lines: `EVIDENCE_TYPE=REPOSITORY_CLEAN_BUILD`, `CLEAN_BUILD=PASS`,
-  `VIVADO=2026.1`, `PART=xc7k325tffg900-2`,
-  `TOP=memblaze_k7_xdma_wrapper`, a lowercase `FPGA_SOURCE_SET_SHA256`,
-  `DRC_ERROR_COUNT=0`, non-negative
-  `SETUP_WNS_NS`, `HOLD_WHS_NS`, and `MINIMUM_BUS_SKEW_SLACK_NS`, a positive
-  `BUS_SKEW_CONSTRAINT_COUNT`, `BUS_SKEW_VIOLATION_COUNT=0`,
-  `TIMING_CONSTRAINTS=PASS`, a non-empty `CLOCK_50_NAME`,
-  `CLOCK_50_PERIOD_NS=20.000`, zero
-  `CHECK_TIMING_NO_CLOCK`, `CHECK_TIMING_CONSTANT_CLOCK`,
-  `CHECK_TIMING_GENERATED_CLOCKS`, `CHECK_TIMING_LATCH_LOOPS`,
-  `CHECK_TIMING_LOOPS`, `CHECK_TIMING_MULTIPLE_CLOCK`,
-  `UNCONSTRAINED_INTERNAL_ENDPOINTS`, `CHECK_TIMING_PARTIAL_INPUT_DELAY`, and
-  `CHECK_TIMING_PARTIAL_OUTPUT_DELAY`, plus the pinned Vivado 2026.1 allowlist
-  counts `CHECK_TIMING_NO_INPUT_DELAY=9`, `CHECK_TIMING_NO_OUTPUT_DELAY=1`, and
-  `CHECK_TIMING_PULSE_WIDTH_CLOCK=8`. Also record the pinned generated-IP
-  methodology findings: `METHODOLOGY_LUTAR_1_WARNING_COUNT=3`,
-  `METHODOLOGY_PDRC_190_WARNING_COUNT=12`,
-  `METHODOLOGY_XDCB_5_WARNING_COUNT=1`,
-  `METHODOLOGY_REQP_1959_ADVISORY_COUNT=64`, and
-  `METHODOLOGY_RELATED_VIOLATION_COUNT=0`. Then record
-  `BITSTREAM_GENERATED=yes`, the lowercase `BITSTREAM_SHA256`, and
-  `BITSTREAM_INCLUDED=no`.
-
-  `FPGA_SOURCE_SET_SHA256` binds the build summary to the exact current source
-  set. Compute SHA-256 over the files in the manifest `source_files` order. For
-  each file, feed these bytes to one running digest: its repository-relative
-  path encoded as UTF-8, one NUL byte, the exact file contents, then one NUL
-  byte. Do not hash generated Vivado output or concatenate per-file hex
-  digests. `tools/validate_repo.py` recomputes this digest from the clone and
-  rejects a stale clean-build summary after any FPGA source edit. Print the
-  exact value for the current clone with:
-
-  ```text
-  python tools/validate_repo.py --print-fpga-source-set-sha256
-  ```
-
-  The six-file release source set includes `fpga/program_sram.tcl`. That file
-  is the volatile programming tool, not a synthesis input; the clean build
-  proves the other build-effective files, and the exact-image JTAG gate
-  independently exercises the current programming script.
-- `validated_repository_exact_image_physical_regression_sanitized.log` must
-  be made from the final board run and contain these unique lines:
-  `EVIDENCE_TYPE=REPOSITORY_EXACT_IMAGE_PHYSICAL_REGRESSION`,
-  `PHYSICAL_REGRESSION=PASS`, the same lowercase `BITSTREAM_SHA256`,
-  `JTAG_SRAM=PASS`, `PCI_ENUMERATION=PASS`, `ENDPOINT=10ee:7024`,
-  `SUBSYSTEM=10ee:0007`, `LSPCI_VERBOSE=CAPTURED`,
-  a positive integer `PF0_BAR0_RESOURCE_SIZE_KIB` taken from that run's active
-  endpoint resource, `SECURE_BOOT=enabled`, `XDMA_DRIVER=PASS`,
-  `DMA_DATA_COMPARE=PASS`, `ALIAS_4G=PASS`, `CHUNKED_1G=PASS`, and
-  `CLEANUP_RC=0`. The BAR size must come from the endpoint's active
-  `lspci -vv` `Region 0` resource in that run, rather than only from the
-  block-design setting. The manifest repeats this measured value and strict
-  validation requires an exact match; it is deliberately not hard-coded to
-  either the generic 128 KiB setting or the 64 KiB XDMA aperture.
-  `linux/01_probe.sh` prints both `LSPCI_VERBOSE=CAPTURED` and the calculated
-  KiB value after saving the full endpoint detail; copy the value only from
-  the exact-image run being summarized.
-
-`RELEASE_MANIFEST.json` records each evidence path and file SHA-256. Strict
-validation checks both file hashes, parses the required gates, compares the
-build and tested bitstream hashes, and then checks the repository checksum
-manifest. Do not copy `PASS` markers from the earlier campaign into these new
-files; derive them from the exact repository-generated image.
-
-The 2026-09-14 topology record's 2.0 Gb/s estimate is incompatible with the
-roughly 597/563 MB/s values printed by the XDMA tool in a separate 2026-09-13
-64 MiB run. That supporting run did not capture PCIe topology at the same
-instant. Both records are retained, but neither is accepted as an end-to-end
-throughput result.
-
-The evidence proves one physical setup at the recorded time, including a
-64 × 64 MiB full-address-space comparison. It is not a production
-qualification, long-duration stability test, monolithic 1 GiB request result,
-or Windows DMA validation.
+完整测试说明见
+[`docs/VALIDATED_RESULTS.zh-CN.md`](../docs/VALIDATED_RESULTS.zh-CN.md)，复演命令见
+[`docs/EXACT_IMAGE_REGRESSION.zh-CN.md`](../docs/EXACT_IMAGE_REGRESSION.zh-CN.md)。
+`RELEASE_MANIFEST.json` 记录这两份文件的 SHA-256，
+`python tools/validate_repo.py --release` 会同时核对内容和哈希。

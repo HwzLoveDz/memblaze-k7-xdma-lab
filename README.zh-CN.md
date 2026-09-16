@@ -17,6 +17,28 @@ Kintex-7 `XC7K325T` 和 4 GiB DDR3。我从实物测量开始重新整理硬件�
 
 ![本次实测连接拓扑](docs/images/wiring-overview.svg)
 
+## 为什么 DMA 放在原生 Linux
+
+我最初使用的是 Windows 笔记本，Vivado 构建、JTAG 下载和 PCIe 枚举都没有
+问题。AMD 有 Windows XDMA 驱动，但源码需要单独
+[申请访问](https://account.amd.com/en/forms/registration/xdma_windows_driver.html)，
+自己构建后还要处理 Windows 内核驱动签名。本仓库没有一份能够直接安装、
+适配这张卡并且可以随项目公开分发的已签名驱动，因此 DMA 验证改在原生
+Linux 完成。
+
+Linux 版则直接公开在
+[`dma_ip_drivers`](https://github.com/Xilinx/dma_ip_drivers)，可以固定源码、
+按当前内核构建，并通过 sysfs、`dmesg` 和 `/dev/xdma*` 查看完整状态。普通
+WSL2 不能接管 Windows 控制的雷电 PCIe endpoint；如果开发机本来就是
+[AMD 支持的 x86-64 Linux](https://docs.amd.com/r/zh-CN/ug973-vivado-release-notes-install-license/%E5%8F%97%E6%94%AF%E6%8C%81%E7%9A%84%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F)，
+可以直接安装 Linux 版 Vivado 2026.1，在一个系统里完成构建、JTAG、驱动、
+DMA、日志收集和 AI 辅助调试。
+
+为了不重新分区笔记本内置的 Windows/BitLocker 硬盘，我用一只 250 GB
+SanDisk 做了 Ubuntu 24.04.5 Persistent Live U 盘，其中 64 GiB 作为
+`casper-rw`。系统、驱动构建、MOK 签名文件、脚本和日志都留在 U 盘，
+实验时内部 NVMe 保持未挂载。已经有原生 Linux 的话，这一步可以直接省掉。
+
 ## 已经跑通的部分
 
 | 阶段 | 实测结果 |
@@ -63,6 +85,10 @@ AXI Interconnect 和 MIG 访问 4 GiB DDR3。设计参数和地址空间跟源�
   -source C:/work/memblaze-k7-xdma-lab/fpga/build.tcl `
   -tclargs C:/work/memblaze-build --write-bitstream
 ```
+
+上面是本次 clean build 使用的 Windows 命令。Linux 下调用 Vivado 安装目录
+中的 `bin/vivado`，把仓库和构建目录换成 Linux 绝对路径即可，Tcl 入口和
+参数保持不变；Linux 入口走同一份 Tcl，但没有计入当前的 clean-build 记录。
 
 检查生成的 DRC 和时序报告，再按
 [`fpga/README.md`](fpga/README.md) 将 bitstream 写入易失 SRAM，并生成
@@ -111,13 +137,6 @@ sudo apt install --yes \
 | `docs/TROUBLESHOOTING.zh-CN.md` | 调试中遇到的问题和解决方法 |
 | `docs/NEXT_EXPERIMENTS.zh-CN.md` | 接下来值得继续做的实验 |
 | `evidence/` | 脱敏后的干净构建和精确映像实机回归摘要 |
-
-## 为什么 DMA 放在 Ubuntu
-
-Windows 负责 Vivado 构建、JTAG 下载和 PCIe 枚举。这里的数据测试放在原生
-x86-64 Linux，是因为仓库内驱动可以直接绑定 PCIe 端点，并完整观察 sysfs、
-`dmesg` 和 `/dev/xdma*`。普通 WSL2 不会从 Windows 手里接管这个雷电 PCIe
-端点，所以不用于执行这些 DMA 测试。
 
 ## 许可
 

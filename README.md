@@ -19,6 +19,33 @@ full 4 GiB DDR3 write/read comparison.
 
 ![Measured connection topology](docs/images/wiring-overview.svg)
 
+## Why the DMA side uses native Linux
+
+I started with a Windows laptop, where Vivado builds, JTAG programming, and
+PCIe enumeration all worked. AMD provides a Windows XDMA driver, but source
+access uses a separate
+[request](https://account.amd.com/en/forms/registration/xdma_windows_driver.html),
+and a locally built driver must still satisfy Windows kernel-signing policy.
+This repository does not include a redistributable, signed package that both
+matches this card and installs under ordinary Windows policy, so the DMA tests
+run on native Linux.
+
+The Linux driver and tools are public in
+[`dma_ip_drivers`](https://github.com/Xilinx/dma_ip_drivers), making it
+possible to pin the source, build for the running kernel, and inspect sysfs,
+`dmesg`, and `/dev/xdma*`. Ordinary WSL2 cannot take ownership of the
+Thunderbolt PCIe endpoint from Windows. If the development machine already
+runs a
+[supported x86-64 Linux distribution](https://docs.amd.com/r/en-US/ug973-vivado-release-notes-install-license/Supported-Operating-Systems),
+the Linux build of Vivado 2026.1 can keep FPGA build, JTAG, driver work, DMA,
+logs, and AI-assisted debugging in one OS.
+
+To avoid repartitioning the laptop's internal Windows/BitLocker drive, I made
+an Ubuntu 24.04.5 Persistent Live USB on a 250 GB SanDisk drive, with 64 GiB
+assigned to `casper-rw`. The system, driver build, MOK signing files, scripts,
+and logs stay on the USB, while the internal NVMe remains unmounted during the
+experiment. An existing native Linux installation makes this step unnecessary.
+
 ## What works
 
 | Stage | Result |
@@ -71,6 +98,11 @@ absolute path:
   -tclargs C:/work/memblaze-build --write-bitstream
 ```
 
+This is the Windows command used for the recorded clean build. On Linux, call
+`bin/vivado` from the Vivado installation and replace the repository and build
+directories with absolute Linux paths. It uses the same Tcl flow, but is not
+part of the current clean-build record.
+
 Review the generated DRC and timing reports, then follow
 [`fpga/README.md`](fpga/README.md) to program the resulting bitstream into
 volatile SRAM and create its JTAG record.
@@ -119,14 +151,6 @@ MOK creation and module signing are covered in the
 | `docs/TROUBLESHOOTING.zh-CN.md` | Problems encountered and their fixes |
 | `docs/NEXT_EXPERIMENTS.zh-CN.md` | Useful next steps for the design |
 | `evidence/` | Sanitized clean-build and exact-image regression summaries |
-
-## Windows and WSL
-
-Windows works well for the Vivado build, JTAG programming, and PCIe
-enumeration. The DMA path here uses native x86-64 Linux because the included
-driver binds directly to the PCIe endpoint and exposes `/dev/xdma*`. Ordinary
-WSL2 does not take that Thunderbolt PCIe endpoint away from the Windows host,
-so it is not the execution environment for these tests.
 
 ## License
 

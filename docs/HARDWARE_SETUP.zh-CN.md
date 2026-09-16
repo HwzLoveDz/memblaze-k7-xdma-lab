@@ -70,7 +70,11 @@ PASS、覆盖范围和速度见 [`VALIDATED_RESULTS.zh-CN.md`](VALIDATED_RESULTS
 
 ## 我用的启动顺序
 
-这次跑通时的顺序如下：
+这次实测使用 Windows 完成 Vivado/JTAG，再重启到 Persistent Live Ubuntu。
+如果开发机本身就是 AMD 支持的 x86-64 Linux，可以在同一系统安装 Vivado，
+完成 JTAG 配置后继续枚举、驱动和 DMA，不需要换系统。
+
+本次跑通时的顺序如下：
 
 1. 断电完成 M.2↔PCIe、辅助 12 V、JTAG 和散热连接；原存储子板不连接，
    J1–J4 无外部驱动，W26 保持高阻。

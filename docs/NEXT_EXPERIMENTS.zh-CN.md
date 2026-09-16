@@ -55,12 +55,11 @@ event 节点接入一个最小自定义中断源，测量触发、唤醒和用�
 
 ## 7. Windows 原生 DMA
 
-Windows 已经完成 Vivado、JTAG 和 PCIe 枚举，数据面尚未验证。拿到与
-`10ee:7024`、系统版本和签名策略匹配的 AMD/Xilinx Windows XDMA 驱动后，
-可以复用 Linux 侧的地址、长度和数据 pattern，补齐 H2C/C2H 比较与吞吐测试。
-
-普通 WSL2 不能直接把雷电隧道里的 PCIe endpoint 绑定给 `xdma.ko`，所以这个
-实验需要 Windows 原生驱动，或继续使用原生 Linux。
+Windows 已经完成 Vivado、JTAG 和 PCIe 枚举，原生 DMA 还没有验证。驱动获取、
+签名以及本仓库选择 Linux 的原因见
+[README](../README.zh-CN.md#为什么-dma-放在原生-linux)。拿到与 `10ee:7024`、
+系统版本和签名策略匹配的 Windows 驱动后，可以复用 Linux 侧的地址、长度和
+数据 pattern，补齐 H2C/C2H 比较与吞吐测试。
 
 ## 8. 上电自动配置
 

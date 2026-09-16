@@ -34,14 +34,14 @@ should be read from `lspci -vv` on the machine under test.
 
 ## Requirements
 
-- Windows with AMD Vivado 2026.1
+- An AMD-supported x86-64 Windows or Linux system with Vivado 2026.1
 - A valid Vivado license for implementation and bitstream generation for
   `xc7k325tffg900-2` and the configured AMD IP
 - A short absolute build path that does not already exist, for example
   `C:\work\mb1`
 
-MIG and XDMA generate deep directory trees. A short build path avoids the
-Windows path-length failures that can otherwise appear during IP generation.
+MIG and XDMA generate deep directory trees. A short build path is especially
+useful on Windows, where long generated paths can fail during IP generation.
 
 AMD lists the annual
 [Vivado BASIC tier](https://www.amd.com/en/products/software/adaptive-socs-and-fpgas/vivado/vivado-licensing-options.html)
@@ -55,7 +55,8 @@ license-tier check is not a release blocker.
 
 ## Create or build from source
 
-From a PowerShell prompt, set the repository and build paths, then run Vivado:
+On Windows, set the repository and build paths from PowerShell, then run
+Vivado:
 
 ```powershell
 $LAB_REPO = (Resolve-Path 'C:\work\memblaze-k7-xdma-lab').Path
@@ -75,6 +76,23 @@ Adjust `$LAB_REPO` to the clone location. `XILINX_VIVADO` is normally set by
 the Vivado command prompt; otherwise set `$VIVADO` to the installed
 `vivado.bat` directly.
 
+On Linux, run the same Tcl entry point with Linux paths:
+
+```bash
+VIVADO_ROOT="/tools/AMD/Vivado/2026.1"
+source "$VIVADO_ROOT/settings64.sh"
+
+LAB_REPO="$HOME/src/memblaze-k7-xdma-lab"
+BUILD_DIR="$HOME/build/memblaze-k7-xdma"
+
+vivado -mode batch -source "$LAB_REPO/fpga/build.tcl" \
+  -tclargs "$BUILD_DIR" --write-bitstream
+```
+
+Adjust `VIVADO_ROOT` to the installation path and choose an absolute
+`BUILD_DIR` that does not already exist. The recorded clean build used Windows;
+this Linux command uses the same Tcl flow but is not part of that record.
+
 The script refuses a relative or existing build directory, a Vivado release
 other than 2026.1, a locked or upgradeable IP, DRC errors, negative setup or
 hold slack, missing or ambiguous clocks, unexpected `check_timing` results, and
@@ -87,9 +105,9 @@ Generated files are written only below `$BUILD_DIR`:
 
 | Result | Path |
 | --- | --- |
-| Vivado project | `$BUILD_DIR\p\memblaze_k7_xdma.xpr` |
-| Build reports | `$BUILD_DIR\reports\` |
-| Routed bitstream | `$BUILD_DIR\memblaze_k7_xdma_wrapper.bit` |
+| Vivado project | `<BUILD_DIR>/p/memblaze_k7_xdma.xpr` |
+| Build reports | `<BUILD_DIR>/reports/` |
+| Routed bitstream | `<BUILD_DIR>/memblaze_k7_xdma_wrapper.bit` |
 
 The generated top-level module is `memblaze_k7_xdma_wrapper`.
 

@@ -2,10 +2,8 @@
   "schema_version": 2,
   "project": "Memblaze K7 XDMA Lab",
   "release": "0.1.0-lab",
-  "status": "pre-publication",
-  "publication_blockers": [
-    "final original hardware wiring image and measured power-boundary review"
-  ],
+  "status": "release-ready",
+  "publication_blockers": [],
   "fpga_design": {
     "repository_inputs_complete": true,
     "part": "xc7k325tffg900-2",
@@ -96,6 +94,40 @@
     "subsystem": "10ee:0007",
     "result": "exact repository bitstream, enumeration, driver binding, basic and concurrent DMA, full 4 GiB chunked comparison, AER/path stability, and cleanup passed",
     "scope_note": "The RC4 wrapper returned 0 natively after the post-cleanup kernel gate; its returned evidence archive and all 100 internally listed files passed SHA-256 verification."
+  },
+  "hardware_record": {
+    "status": "documented-with-known-limits",
+    "wiring_figure": {
+      "path": "docs/images/wiring-overview.svg",
+      "sha256": "8aedfca73cfee31a10b885dfe4b220f96a9cf666d78896a9dedbbe658825dbf1"
+    },
+    "photos": {
+      "parts": {
+        "path": "docs/images/hardware-parts-overview.jpg",
+        "sha256": "afa451f140013897305ab0a42d936facfe13ea2a8349cb056c0e2437e60ef5d5"
+      },
+      "debug_session": {
+        "path": "docs/images/xdma-debug-session.jpg",
+        "sha256": "cdf754349dee6ccf413eca8f0a53c540cc759a7e520c3977c2871f9f8b72871e"
+      },
+      "powered_fixture": {
+        "path": "docs/images/hardware-running.jpg",
+        "sha256": "73f615f90f40b8ec65921d220b2152163b27212fe0bf31f11183a96bd7a500b4"
+      }
+    },
+    "power_topology": {
+      "pcie_and_3v3": "Thunderbolt/USB4 M.2 enclosure -> M.2 slot -> M.2-to-PCIe adapter -> board PCIe and 3.3 V rails",
+      "12v": "dedicated USB-C PD source -> trigger module configured and negotiated to 12 V -> adapter auxiliary +12 V and return/GND input -> board PCIe 12 V input rail",
+      "validated_sequence": "both rails were stable before Windows JTAG SRAM programming and remained present through host reboot and the native-Ubuntu RC4 regression; relative rail order was not isolated",
+      "unmeasured_boundary": "auxiliary connector pinout/polarity, powered-off ground continuity, reverse current, single-source power states, current ratings, and startup/steady current were not publicly measured; hot-plug operation is not claimed"
+    },
+    "identified_components": {
+      "host": "ASUS ROG Flow Z13",
+      "jtag": "Xilinx Platform Cable USB, model DLC9LP, with an adapter cable; the public pin table is unavailable",
+      "enclosure": "pictured UGREEN M.2 enclosure; exact model and bridge unknown",
+      "adapter": "pictured M.2 M-Key to PCIe x4 adapter marked PCIE 4.0; exact model and revision unknown",
+      "cooling": "pictured active heatsink and fan; exact model and fan power source unknown"
+    }
   },
   "xdma_driver": {
     "upstream": "https://github.com/Xilinx/dma_ip_drivers",

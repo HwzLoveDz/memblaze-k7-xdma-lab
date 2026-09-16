@@ -1,21 +1,44 @@
 # Memblaze K7 XDMA Lab
 
-Linux XDMA bring-up and DDR3 integrity tests for one reverse-engineered
-Memblaze/PBlaze3 board built around the Kintex-7 XC7K325T. The exact supported
-board marking and revision will be frozen with the final wiring/BOM record.
+Linux XDMA bring-up and DDR3 integrity tests for the pictured reverse-engineered
+Memblaze/PBlaze3 board built around the Kintex-7 XC7K325T. The repository fixes
+the validated physical setup and its known limits; do not extend its pin map or
+power assumptions to every similar board revision.
 
 [简体中文](README.zh-CN.md) · [Docs map](docs/README.md) ·
 [Validated results](docs/VALIDATED_RESULTS.zh-CN.md) ·
 [Hardware setup](docs/HARDWARE_SETUP.zh-CN.md) ·
 [Next experiments](docs/NEXT_EXPERIMENTS.zh-CN.md)
 
-> **Project status:** pre-publication `v0.1.0-lab`. The complete FPGA build
+> **Current release:** `v0.1.0-lab`. The complete FPGA build
 > inputs live under `fpga/` and build directly from `fpga/build.tcl`.
 > A clean Vivado 2026.1 build and the matching exact-bitstream physical
-> RC4 regression passed natively with final return code 0. The final power/JTAG
-> wiring figure is still pending.
-> No public push should be made until every release blocker in
-> `docs/OPEN_ITEMS.zh-CN.md` is closed.
+> RC4 regression passed natively with final return code 0. The physical wiring,
+> photos, power topology, and unmeasured boundaries are recorded in the
+> [hardware guide](docs/HARDWARE_SETUP.zh-CN.md).
+
+![Connection used in the successful run, including unmeasured boundaries](docs/images/wiring-overview.svg)
+
+The adapter's auxiliary 12 V input is fed by a dedicated USB-C PD source through
+a PD trigger module configured to negotiate 12 V in this setup. The
+Thunderbolt/USB4 M.2 enclosure supplies 3.3 V through the M.2 slot. Both rails
+were stable before JTAG configuration and stayed powered from Windows through
+the host reboot and Ubuntu regression. This does not claim measured reverse
+current or single-source behavior between the two sources; do not hot-plug the
+card-side wiring or infer polarity from wire color.
+
+## Physical setup
+
+![Hardware used for this run, laid out while powered off](docs/images/hardware-parts-overview.jpg)
+
+![Powered Memblaze temporary test fixture](docs/images/hardware-running.jpg)
+
+The [native-Ubuntu debug photo](docs/images/xdma-debug-session.jpg) shows a
+64 MiB chunked C2H readback and comparison in progress.
+
+The running photo documents a temporary test fixture, not a recommended
+mechanical installation. Pass/fail claims come from the sanitized logs; the
+photos identify the physical combination and operating state.
 
 ## What this repository provides
 
@@ -84,10 +107,12 @@ run also covered all 4 GiB with 64 requests of 64 MiB each. A single monolithic
 
 ## Quick start
 
-Read [the hardware setup](docs/HARDWARE_SETUP.zh-CN.md) before applying power.
-Do not infer the external 12 V polarity, power-source isolation, or JTAG cable
-direction from connector shape. The final wiring figure must settle those
-details before publication.
+Read [the hardware setup](docs/HARDWARE_SETUP.zh-CN.md) and inspect the
+[connection topology](docs/images/wiring-overview.svg) before applying power.
+Do not infer 12 V polarity, source behavior, or JTAG direction from connector
+shape or wire color. The public repository does not yet contain a verified
+Pin 1/Vref/TCK/TMS/TDI/TDO table. Items explicitly marked as unmeasured must be
+checked on the reproducer's own hardware.
 
 ### 1. Build and program the FPGA
 

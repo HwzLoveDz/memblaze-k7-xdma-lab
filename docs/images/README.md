@@ -1,21 +1,30 @@
-# Hardware image checklist
+# Hardware images
 
-The public wiring image is still missing. Before the first push, place exactly
-one original image here as `wiring-overview.png`, `.jpg`, `.jpeg`,
-`.webp`, or `.svg`. Remove EXIF metadata and visible device serials.
+The public hardware record uses one canonical wiring figure plus three
+sanitized photographs:
 
-Required callouts:
+| File | Purpose |
+|---|---|
+| `wiring-overview.svg` | Data, 3.3 V, 12 V, and JTAG topology; known unknowns are shown in the figure |
+| `hardware-parts-overview.jpg` | Powered-off overview of the physical parts used; items are laid out, not wired |
+| `xdma-debug-session.jpg` | Native-Ubuntu 64 MiB chunked C2H readback and comparison in progress |
+| `hardware-running.jpg` | Powered temporary test fixture; background device identifiers are redacted |
 
-- board and adapter orientation;
-- exact board marking/revision, FPGA part, and populated DDR3 markings/count;
-- enclosure/bridge, M.2-to-PCIe adapter, cable, PSU, and JTAG model/revision;
-- external 12 V polarity and ground;
-- PSU current rating, measured startup/steady current, and bench current limit;
-- power-source isolation/backfeed boundary;
-- JTAG Pin 1, Vref, and cable direction;
-- heatsink, fan, airflow direction, and fan power source;
-- J1–J4 left undriven and W26 high-impedance.
+The JPEG files were re-encoded without EXIF metadata. They identify the tested
+physical combination and operating state; pass/fail claims remain grounded in
+the sanitized text evidence under `evidence/`.
 
-The image must agree with powered-off continuity and resistance measurements.
-A drawn boundary alone is not proof that the enclosure/M.2 supply and external
-12 V cannot backfeed one another.
+The wiring figure records the user-confirmed topology:
+
+- the Thunderbolt/USB4 enclosure supplies PCIe and 3.3 V through M.2;
+- a separate USB-C PD source and trigger module, configured and negotiated to
+  12 V in this setup, feed the adapter's auxiliary +12 V and return/GND input;
+- both rails were stable before JTAG SRAM configuration and remained present
+  from Windows through the reboot and Ubuntu regression;
+- J1–J4 remain externally undriven and W26 remains high-impedance.
+
+The figure deliberately does not claim the auxiliary connector pinout,
+powered-off ground continuity, reverse-current or single-source behavior,
+current limits, or a public JTAG pin table. Those limits are described in
+`docs/HARDWARE_SETUP.zh-CN.md`; a diagram is not a substitute for powered-off
+continuity, polarity, and rail-routing checks on another adapter revision.

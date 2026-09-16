@@ -46,10 +46,11 @@ generic PF0 BAR0 参数为 128 KiB，XDMA core 内部的 configuration aperture
 参数为 64 KiB，这两个尺寸不能混写。主机对确切 bitstream 实际分配和报告的
 BAR 资源必须在每次实机回归中用 `lspci -vv` 单独保存。
 
-仓库内生成流从 `fpga/build.tcl` 启动。当前发布前仍需把它生成的确切
-bitstream 写入本机实板，再重复 JTAG、枚举、驱动、基础 DMA、
-`alias-4g`、`chunked-1g` 和清理门。完成前，既有实验只能证明此前
-实验路径，不能替代新映像验收。
+仓库内生成流从 `fpga/build.tcl` 启动。当前 `v0.1.0-lab` 已将干净构建生成的
+确切 bitstream 写入本机实板，并完成 RC4 的 JTAG、枚举、驱动、基础 DMA、
+`alias-4g`、`chunked-1g`、完整 4 GiB 分块比较和清理门。以后只要 FPGA 源码、
+约束、IP 参数或工具版本改变，就必须对新 bitstream 重新执行这些验收；旧映像
+证据不能替代新映像验收。
 
 ## 外部 IO 边界
 

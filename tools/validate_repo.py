@@ -1471,6 +1471,67 @@ def main() -> int:
                     errors.append(
                         f"{document.relative_to(ROOT).as_posix()} does not reference {target}"
                     )
+    hardware_record = manifest.get("hardware_record", {})
+    if not isinstance(hardware_record, dict):
+        hardware_record = {}
+    if args.release:
+        if hardware_record.get("status") != "documented-with-known-limits":
+            errors.append(
+                "hardware_record status must be 'documented-with-known-limits'"
+            )
+        declared_images: list[tuple[str, object]] = []
+        declared_images.append(("wiring_figure", hardware_record.get("wiring_figure")))
+        photos = hardware_record.get("photos", {})
+        if not isinstance(photos, dict):
+            photos = {}
+        for key in ("parts", "debug_session", "powered_fixture"):
+            declared_images.append((f"photos.{key}", photos.get(key)))
+        image_paths: dict[str, str] = {}
+        for label, entry in declared_images:
+            if not isinstance(entry, dict):
+                errors.append(f"hardware_record {label} must be an object")
+                continue
+            relative = entry.get("path")
+            declared_hash = entry.get("sha256")
+            if not isinstance(relative, str):
+                errors.append(f"hardware_record {label} path is missing")
+                continue
+            image_paths[label] = relative
+            path = ROOT / relative
+            if not path.is_file():
+                errors.append(f"hardware image is missing: {relative}")
+                continue
+            if not isinstance(declared_hash, str) or not re.fullmatch(
+                r"[0-9a-f]{64}", declared_hash
+            ):
+                errors.append(f"hardware_record {label} SHA-256 is invalid")
+            elif sha256(path) != declared_hash:
+                errors.append(f"hardware image SHA-256 mismatch: {relative}")
+            if (
+                path.suffix.lower() in {".jpg", ".jpeg"}
+                and b"Exif\x00\x00" in path.read_bytes()
+            ):
+                errors.append(f"JPEG still contains EXIF metadata: {relative}")
+        expected_images = {
+            "wiring_figure": "docs/images/wiring-overview.svg",
+            "photos.parts": "docs/images/hardware-parts-overview.jpg",
+            "photos.debug_session": "docs/images/xdma-debug-session.jpg",
+            "photos.powered_fixture": "docs/images/hardware-running.jpg",
+        }
+        if image_paths != expected_images:
+            errors.append("hardware_record image paths do not match the public image set")
+        for document, prefix in (
+            (ROOT / "README.md", "docs/images/"),
+            (ROOT / "README.zh-CN.md", "docs/images/"),
+            (ROOT / "docs" / "HARDWARE_SETUP.zh-CN.md", "images/"),
+        ):
+            content = document.read_text(encoding="utf-8")
+            for relative in expected_images.values():
+                target = prefix + Path(relative).name
+                if target not in content:
+                    errors.append(
+                        f"{document.relative_to(ROOT).as_posix()} does not reference {target}"
+                    )
     if args.release and manifest.get("status") != "release-ready":
         errors.append("RELEASE_MANIFEST.json status is not release-ready")
     if args.release and manifest.get("publication_blockers"):

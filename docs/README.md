@@ -5,7 +5,7 @@
 | [硬件连接](HARDWARE_SETUP.zh-CN.md) | 供电、JTAG、PCIe、上电顺序与接线图要求 |
 | [架构](ARCHITECTURE.zh-CN.md) | 仓库内 FPGA 构建输入及 XDMA、AXI、DDR3 数据路径 |
 | [实测结果](VALIDATED_RESULTS.zh-CN.md) | 已证明的结论、当前映像回归状态和证据边界 |
-| [待办与边界](OPEN_ITEMS.zh-CN.md) | 发布阻塞项、非阻塞限制和已解决项 |
+| [待办与边界](OPEN_ITEMS.zh-CN.md) | 已公开硬件边界、非阻塞限制和已解决项 |
 | [Secure Boot](SECURE_BOOT.zh-CN.md) | MOK 创建、注册、签名与验证 |
 | [精确映像一次性回归](EXACT_IMAGE_REGRESSION.zh-CN.md) | 用一个 Ubuntu 会话完成精确 bitstream 的发布验收、失败留证和清理 |
 | [Windows 与 WSL](WINDOWS_WSL.zh-CN.md) | 为什么数据面使用原生 Ubuntu |

@@ -1,18 +1,38 @@
 # Memblaze K7 XDMA Lab
 
-这是一个面向一块逆向整理的 Memblaze/PBlaze3 XC7K325T 主板的 Linux XDMA
-上手与 DDR3 数据一致性测试项目。最终接线图/BOM 会固定实际支持的主板丝印
-和修订；当前不能把 pin map 外推到所有同系列板卡。
+这是一个面向照片所示 Memblaze/PBlaze3 XC7K325T 主板的 Linux XDMA 上手与
+DDR3 数据一致性测试项目。仓库记录了本次实测组合和连接拓扑；不能把 pin map
+或供电方式外推到所有同系列板卡。
 
 [English](README.md) · [文档地图](docs/README.md) ·
 [实测结果](docs/VALIDATED_RESULTS.zh-CN.md) ·
 [硬件连接](docs/HARDWARE_SETUP.zh-CN.md) ·
 [待办与边界](docs/OPEN_ITEMS.zh-CN.md)
 
-> **当前状态：** 发布前 `v0.1.0-lab`。完整 FPGA 构建输入位于 `fpga/`，
+> **当前版本：** `v0.1.0-lab`。完整 FPGA 构建输入位于 `fpga/`，
 > 入口为 `fpga/build.tcl`。Vivado 2026.1 干净构建和同一 bitstream 的
-> RC4 精确映像实机回归均已通过，最终原生返回码为 0；供电/JTAG 接线图尚未完成。
-> `docs/OPEN_ITEMS.zh-CN.md` 中的发布阻塞项全部关闭后再公开推送。
+> RC4 精确映像实机回归均已通过，最终原生返回码为 0。供电拓扑、实物照片和
+> 未测边界已写入[硬件连接](docs/HARDWARE_SETUP.zh-CN.md)。
+
+![本次成功使用的连接拓扑，包含未测边界](docs/images/wiring-overview.svg)
+
+12 V 由独立 USB-C PD 电源经本次设定为 12 V 的诱骗模块送入 M.2↔PCIe
+转接板辅助输入；3.3 V 由雷电/USB4 M.2 盒经 M.2 插槽提供。两路在 JTAG
+配置前均已稳定，并从 Windows、主机重启到 Ubuntu 测试全程保持供电。该记录
+不等于已经测得反向电流或单路供电状态，复刻时禁止带电插拔，也不能仅凭
+线色判断极性。
+
+## 实物与运行状态
+
+![本次器材断电平铺总览](docs/images/hardware-parts-overview.jpg)
+
+![实机通电运行的临时台架](docs/images/hardware-running.jpg)
+
+[原生 Ubuntu 调试照片](docs/images/xdma-debug-session.jpg)记录了 64 MiB 分块
+C2H 回读和比较过程。
+
+运行照中的临时支撑和线缆布置只记录本次实验，不是推荐的长期结构。最终测试
+结论来自仓库内的脱敏日志，照片只用于固定实物组合和现场状态。
 
 ## 仓库包含什么
 
@@ -74,9 +94,11 @@ bitstream 本体继续保留在 Git 之外，相同哈希已贯穿干净构建�
 
 ## 上手顺序
 
-先阅读[硬件连接与上电边界](docs/HARDWARE_SETUP.zh-CN.md)。不能根据连接器
-外形猜测外部 12 V 极性、双电源隔离关系或 JTAG 排线方向；最终接线图必须
-在公开前把这些信息落清楚。
+先阅读[硬件连接与上电边界](docs/HARDWARE_SETUP.zh-CN.md)并核对
+[连接拓扑](docs/images/wiring-overview.svg)。不能根据连接器外形或线色猜测
+12 V 极性、电源边界或 JTAG 排线方向；本仓库尚无经过核验的 Pin 1、Vref、
+TCK、TMS、TDI、TDO 逐针表。仓库明确标出的“未测”内容需要复刻者在自己的
+实物上核对。
 
 ### 1. 构建并配置 FPGA
 

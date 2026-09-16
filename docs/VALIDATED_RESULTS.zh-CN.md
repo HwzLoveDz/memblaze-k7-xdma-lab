@@ -8,8 +8,9 @@
 287f0ff1e9a0bef58842d1769e782fe06ed16cf3019d8e65477ca7a688f5b1c5
 ```
 
-同一文件随后通过 JTAG 写入 XC7K325T 易失 SRAM，并在保持 FPGA 外部供电的
-情况下进入 Ubuntu。RC4 实机完成 PCIe 枚举、XDMA 全新构建/签名/加载、基础
+同一文件随后通过 JTAG 写入 XC7K325T 易失 SRAM，并在保持 PD 诱骗 12 V 与
+M.2 插槽 3.3 V 两路供电的情况下进入 Ubuntu。RC4 实机完成 PCIe 枚举、XDMA
+全新构建/签名/加载、基础
 DMA、双通道 DMA、`alias-4g`、`chunked-1g`、完整 4 GiB 分块数据比较、
 PCIe/AER 检查和清理，原生返回 `FINAL_EXPERIMENT_RC=0`。构建、JTAG 和实机
 证据中的 bitstream 哈希完全一致。
@@ -121,8 +122,9 @@ ASMedia/Thunderbolt 字段中仍出现 2.5 GT/s ×1。该字段组合与工具�
 - 没有完成 Windows XDMA 数据闭环；
 - 没有验证 configuration flash 或自动上电配置；完全断电后仍需 JTAG；
 - W26 功能未知，不作为顶层端口，配置后保持 `Pullnone` 和外部高阻；
-- 最终支持的主板修订、供电极性、JTAG 方向和转接链路仍以待加入的原始接线图
-  与实物 BOM 为准。
+- 本次连接和实物组合见[硬件连接](HARDWARE_SETUP.zh-CN.md)与
+  [`wiring-overview.svg`](images/wiring-overview.svg)；反向电流、单路供电、电流数据、
+  JTAG 逐针表和无法从照片确认的料号仍属于公开已知边界。
 
 完整未脱敏归档只保存在本地分析目录，不进入公开仓库；公开证据不包含个人
 路径、USB/JTAG 序列号、MOK 标识、私钥或 DMA payload。

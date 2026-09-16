@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940" role="img" aria-labelledby="title desc">
+  <title id="title">Memblaze K7 XDMA connection used in the successful run, including unmeasured boundaries</title>
+  <desc id="desc">The successful Thunderbolt to M.2 to PCIe data path, M.2-supplied 3.3 volt rail, auxiliary 12 volt plus return path from a USB-C PD trigger, JTAG configuration, and the boundaries that remain unmeasured.</desc>
+  <defs>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#2463a8"/></marker>
+    <marker id="arrow-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#c0392b"/></marker>
+    <marker id="arrow-green" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#268257"/></marker>
+    <marker id="arrow-purple" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#6b4aa0"/></marker>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="130%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#17202a" flood-opacity="0.12"/></filter>
+    <style>
+      .bg { fill: #f7f5f1; }
+      .box { fill: #ffffff; stroke: #cbc5bb; stroke-width: 2; rx: 16; filter: url(#shadow); }
+      .title { font: 700 34px "Segoe UI", "Noto Sans SC", sans-serif; fill: #17191c; }
+      .subtitle { font: 18px "Segoe UI", "Noto Sans SC", sans-serif; fill: #585e66; }
+      .name { font: 700 23px "Segoe UI", "Noto Sans SC", sans-serif; fill: #1c2127; }
+      .text { font: 18px "Segoe UI", "Noto Sans SC", sans-serif; fill: #3d444d; }
+      .small { font: 16px "Segoe UI", "Noto Sans SC", sans-serif; fill: #5c626a; }
+      .wire-label { font: 700 17px "Segoe UI", "Noto Sans SC", sans-serif; paint-order: stroke; stroke: #f7f5f1; stroke-width: 7; stroke-linejoin: round; }
+      .note { fill: #fff8ed; stroke: #d39c46; stroke-width: 2; rx: 14; }
+      .limit { fill: #fff2f0; stroke: #c85d52; stroke-width: 2; rx: 14; }
+    </style>
+  </defs>
+  <rect class="bg" x="0" y="0" width="1600" height="940"/>
+
+  <text class="title" x="70" y="65">Memblaze K7 XDMA 本次成功使用的连接拓扑</text>
+  <text class="subtitle" x="70" y="98">仅覆盖照片所示实物组合；蓝色为 PCIe 数据，绿色为 3.3 V，红色为 12 V，紫色为 JTAG。</text>
+
+  <rect class="box" x="70" y="170" width="260" height="170"/>
+  <text class="name" x="100" y="220">ASUS ROG Flow Z13</text>
+  <text class="text" x="100" y="258">原生 Ubuntu 24.04.5</text>
+  <text class="text" x="100" y="290">Secure Boot Enabled</text>
+  <text class="small" x="100" y="320">Windows 仅用于 Vivado / JTAG</text>
+
+  <rect class="box" x="470" y="170" width="280" height="170"/>
+  <text class="name" x="500" y="220">UGREEN M.2 外接盒</text>
+  <text class="text" x="500" y="258">Thunderbolt / USB4 路径</text>
+  <text class="text" x="500" y="290">M.2 M-Key：PCIe ×4 + 3.3 V</text>
+  <text class="small" x="500" y="320">确切型号与桥芯片未记录</text>
+
+  <rect class="box" x="900" y="170" width="300" height="170"/>
+  <text class="name" x="930" y="220">M.2 M-Key ↔ PCIe ×4</text>
+  <text class="text" x="930" y="258">插槽转接板；板面标 PCIE 4.0</text>
+  <text class="text" x="930" y="290">接收 M.2 3.3 V</text>
+  <text class="text" x="930" y="320">另有辅助 12 V 输入</text>
+
+  <rect class="box" x="1280" y="150" width="270" height="210"/>
+  <text class="name" x="1310" y="205">Memblaze 主板</text>
+  <text class="text" x="1310" y="242">XC7K325T / XDMA</text>
+  <text class="text" x="1310" y="274">4 GiB DDR3</text>
+  <text class="text" x="1310" y="306">主动散热</text>
+  <text class="small" x="1310" y="337">J1–J4 未驱动；W26 高阻</text>
+
+  <path d="M330 255 H470" fill="none" stroke="#2463a8" stroke-width="8" marker-end="url(#arrow-blue)"/>
+  <text class="wire-label" x="350" y="238" fill="#2463a8">Thunderbolt 4</text>
+  <path d="M750 255 H900" fill="none" stroke="#2463a8" stroke-width="8" marker-end="url(#arrow-blue)"/>
+  <text class="wire-label" x="773" y="238" fill="#2463a8">PCIe ×4</text>
+  <path d="M1200 255 H1280" fill="none" stroke="#2463a8" stroke-width="8" marker-end="url(#arrow-blue)"/>
+
+  <path d="M610 340 V405 H1050 V340" fill="none" stroke="#268257" stroke-width="7" marker-end="url(#arrow-green)"/>
+  <text class="wire-label" x="690" y="394" fill="#268257">M.2 插槽提供 3.3 V</text>
+  <path d="M1200 300 H1280" fill="none" stroke="#268257" stroke-width="7" marker-end="url(#arrow-green)"/>
+
+  <rect class="box" x="370" y="520" width="290" height="150"/>
+  <text class="name" x="400" y="570">USB-C PD 电源</text>
+  <text class="text" x="400" y="608">经 PD 协商获得目标电压</text>
+  <text class="small" x="400" y="640">型号、额定电流未记录</text>
+
+  <rect class="box" x="790" y="520" width="300" height="150"/>
+  <text class="name" x="820" y="570">USB-C PD 诱骗模块</text>
+  <text class="text" x="820" y="608">本次设定并协商为 12 V</text>
+  <text class="small" x="820" y="640">极性按实物线束，不凭线色推断</text>
+
+  <path d="M660 595 H790" fill="none" stroke="#c0392b" stroke-width="8" marker-end="url(#arrow-red)"/>
+  <text class="wire-label" x="686" y="578" fill="#c0392b">USB-C</text>
+  <path d="M1090 595 H1145 V340" fill="none" stroke="#c0392b" stroke-width="8" marker-end="url(#arrow-red)"/>
+  <text class="wire-label" x="1075" y="565" fill="#c0392b">+12 V + return/GND</text>
+  <path d="M1200 320 H1280" fill="none" stroke="#c0392b" stroke-width="7" marker-end="url(#arrow-red)"/>
+
+  <rect class="box" x="70" y="520" width="230" height="150"/>
+  <text class="name" x="100" y="570">Platform Cable USB</text>
+  <text class="text" x="100" y="608">Xilinx / 型号 DLC9LP</text>
+  <text class="small" x="100" y="640">转接排线 / JTAG</text>
+  <path d="M300 595 H330 V455 H1415 V360" fill="none" stroke="#6b4aa0" stroke-width="6" stroke-dasharray="14 10" marker-end="url(#arrow-purple)"/>
+  <text class="wire-label" x="620" y="443" fill="#6b4aa0">易失 SRAM 配置；Pin 映射另行核对</text>
+
+  <rect class="note" x="70" y="735" width="700" height="140"/>
+  <text class="name" x="100" y="780">本次成功操作顺序</text>
+  <text class="small" x="100" y="815">断电完成连接 → 接通两路供电并确认稳定 → 启动 Windows</text>
+  <text class="small" x="100" y="843">→ JTAG 配置 SRAM → 保持 12 V 与 3.3 V，重启 Ubuntu</text>
+  <text class="small" x="100" y="869">→ 枚举并运行 XDMA；本次未单测两路的相对上电先后</text>
+
+  <rect class="limit" x="820" y="700" width="730" height="195"/>
+  <text class="name" x="850" y="760">尚未由公开测量证明的边界</text>
+  <text class="small" x="850" y="798">• 辅助 12 V 接口逐针 / 极性；断电时还需确认 GND 连续性</text>
+  <text class="small" x="850" y="830">• 反向电流、单路供电状态、额定能力及启动 / 稳态电流</text>
+  <text class="small" x="850" y="862">• JTAG Pin 1 / Vref / TCK / TMS / TDI / TDO；照片不是接线表</text>
+</svg>

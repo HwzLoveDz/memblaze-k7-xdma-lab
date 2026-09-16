@@ -26,8 +26,9 @@ FPGA configuration flash 或启动项。它会覆盖 FPGA 外部 DDR 的测试�
 4. 把当前仓库快照、bitstream、JTAG 报告及各自 sidecar 放到 Ubuntu 能从
    Live USB 读取的位置。
    不要以挂载 Windows 内部 NVMe 的方式给脚本提供文件。
-5. 保持 FPGA 外部电源不断电，重启主机并选择 Ubuntu Live USB。SRAM 映像在
-   FPGA 断电后会丢失；主机重启和 PCIe PERST# 不等于 FPGA 断电。
+5. 保持 PD 诱骗 12 V 和雷电盒 M.2 插槽 3.3 V 两路供电不断，重启主机并选择
+   Ubuntu Live USB。SRAM 映像在 FPGA 断电后会丢失；主机重启和 PCIe PERST#
+   不等于 FPGA 断电。具体拓扑见[硬件连接](HARDWARE_SETUP.zh-CN.md)。
 
 脚本会拒绝以下 JTAG 证据：hash 不等于 manifest、并非 XC7K325T、配置状态
 不完整、出现 CRC error、DONE/EOS/INIT_B/GWE 未置位、存在 cfgmem 目标，或报告
@@ -49,7 +50,8 @@ FPGA configuration flash 或启动项。它会覆盖 FPGA 外部 DDR 的测试�
 - 当前内核头文件、构建依赖、`pciutils`、`mokutil`、OpenSSL 和
   `systemd-inhibit` 已安装，且 logind 可用；
 - `/dev/shm` 至少空闲 384 MiB、HOME 至少空闲 2 GiB；
-- FPGA 供电和散热稳定，存储子板未连接，J1–J4/W26 没有外部驱动冲突。
+- PD 诱骗 12 V、M.2 插槽 3.3 V 和散热均稳定，存储子板未连接，J1–J4/W26
+  没有外部驱动冲突。
 
 总控会先通过 `systemd-inhibit` 为当前进程获取 `idle` 阻止锁，避免长测期间
 因桌面空闲而自动挂起。进程退出后该锁自动释放，不会修改系统电源策略；本轮

@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented here.
 
-## [0.1.0-lab] - Unreleased
+## [0.1.0-lab] - 2026-09-16
 
 ### Added
 
@@ -22,6 +22,13 @@ All notable changes to this project will be documented here.
 - Native RC4 exact-image physical regression evidence: fresh XDMA build,
   Secure Boot load, basic and concurrent DMA, full 4 GiB comparison,
   post-cleanup kernel scan, and cleanup all completed with return code 0.
+- Sanitized hardware, debug-session, and powered-fixture photographs plus a
+  canonical wiring figure covering PCIe, M.2 3.3 V, PD-triggered 12 V, and
+  JTAG paths.
+- The exact dual-source power topology and the successful keep-powered
+  Windows-to-Ubuntu sequence, with auxiliary connector, ground continuity,
+  reverse-current, single-source, current, and pin-table boundaries stated
+  explicitly.
 
 ### Fixed
 
@@ -44,18 +51,16 @@ All notable changes to this project will be documented here.
   a runtime filter test. The final scan now runs after mandatory driver cleanup,
   and a filter read/error failure also fails the workflow.
 
-### Release blockers
-
-- Add and review the original hardware wiring figure, complete physical BOM,
-  and measured power-source isolation/backfeed boundary.
-- After those physical records are complete, refresh their manifest entries,
-  regenerate `SHA256SUMS.txt`, and run the strict release validator.
-
 ### Known limits
 
 - Validated on one physical host and adapter path; a second independent replay
   is not required for this release.
-- `lspci` topology fields and the XDMA tool's single-transfer timing disagree;
-  end-to-end throughput has not been characterized.
+- `lspci` topology fields and the XDMA tool's single-transfer timing disagree.
+  Application-level and tool-level throughput are recorded, but the result is
+  not claimed as a peak physical-link characterization.
 - A single monolithic 1 GiB DMA request was not validated; the public flow uses
   requests no larger than 64 MiB.
+- The exact enclosure bridge, adapter revision, auxiliary connector pinout,
+  PD/line current ratings, ground continuity, reverse-current and single-source
+  behavior, and public JTAG pin table remain unknown; the release only claims
+  the pictured and physically tested combination.

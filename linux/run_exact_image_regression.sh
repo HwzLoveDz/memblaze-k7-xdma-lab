@@ -32,8 +32,9 @@ Usage:
     [--expected-bitstream-sha256 64_LOWERCASE_HEX]
 
 The FPGA must already have been programmed over JTAG from the supplied,
-repository-built bitstream, and its external power must have remained on while
-the host booted Ubuntu. Both files and both hash sidecars are read-only inputs
+repository-built bitstream, and both its PD-triggered 12 V supply and M.2-slot
+3.3 V supply must have remained on while the host booted Ubuntu. Both files and
+both hash sidecars are read-only inputs
 from the Windows step. Each sidecar contains only one SHA-256 token.
 
 This protected wrapper requires:

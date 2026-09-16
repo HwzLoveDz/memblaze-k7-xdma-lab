@@ -63,10 +63,7 @@ The bitstream itself is generated locally and is not committed. Detailed
 numbers and the two concise evidence records are in
 [Validated results](docs/VALIDATED_RESULTS.zh-CN.md).
 
-<p align="center">
-  <img src="docs/images/xdma-debug-session.jpg" width="900"
-       alt="XDMA DDR3 validation running in native Ubuntu">
-</p>
+![XDMA DDR3 validation running in native Ubuntu](docs/images/xdma-debug-session.jpg)
 
 ## Hardware path
 

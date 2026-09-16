@@ -84,8 +84,7 @@ EVIDENCE_BUNDLE_SIDECAR=...tar.gz.sha256
 证据包不包含随机 DMA payload，但保留每次传输的 SHA-256、返回码和 `cmp`
 结果。
 
-<details>
-<summary>完整通过时应看到的字段</summary>
+### 完整通过时应看到的字段
 
 ```text
 WINDOWS_JTAG_EVIDENCE=PASS
@@ -111,10 +110,7 @@ FINAL_EXPERIMENT_RC=0
 `IRQ_DELTA_STATUS` 和 `AER_STATUS_STABLE` 只有在平台提供可归属的计数或状态时
 才会写 `PASS`/`yes`。平台没有暴露字段时会写 `UNAVAILABLE` 和对应原因。
 
-</details>
-
-<details>
-<summary>失败后怎么恢复</summary>
+### 失败后怎么恢复
 
 - `STOP_BEFORE_WRITE`：尚未创建 run 目录；按屏幕输出核对 Live USB、挂载和
   空间。
@@ -129,5 +125,3 @@ FINAL_EXPERIMENT_RC=0
   PERST# 和 PCIe 链路排查。
 
 任何失败都会保留已经产生的 summary、`lspci`、拓扑、内核日志和子脚本日志。
-
-</details>

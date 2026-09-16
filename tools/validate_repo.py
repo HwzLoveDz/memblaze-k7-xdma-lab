@@ -311,6 +311,47 @@ def check_local_links(path: Path, text: str, errors: list[str]) -> None:
             errors.append(f"{path.relative_to(ROOT)}: missing local link: {target}")
 
 
+def check_markdown_portability(path: Path, text: str, errors: list[str]) -> None:
+    """Reject visible HTML-like markup outside fenced and inline code."""
+    relative = path.relative_to(ROOT).as_posix()
+    fence: tuple[str, int] | None = None
+    escaped_tag = re.compile(r"\\</?[A-Za-z][^>\n]*>")
+    entity_tag = re.compile(r"&lt;/?[A-Za-z][^&\n]*?&gt;", re.IGNORECASE)
+    raw_tag = re.compile(r"</?[A-Za-z][A-Za-z0-9-]*(?:\s[^>\n]*)?>")
+
+    for line_number, line in enumerate(text.splitlines(), start=1):
+        fence_match = re.match(r"^\s*(`{3,}|~{3,})", line)
+        if fence is not None:
+            if fence_match:
+                marker = fence_match.group(1)
+                if marker[0] == fence[0] and len(marker) >= fence[1]:
+                    fence = None
+            continue
+        if fence_match:
+            marker = fence_match.group(1)
+            fence = (marker[0], len(marker))
+            continue
+
+        visible = re.sub(r"`+[^`\n]*`+", "", line)
+        if escaped_tag.search(visible):
+            errors.append(
+                f"{relative}:{line_number}: escaped HTML-like tag is visible text"
+            )
+            continue
+        if entity_tag.search(visible):
+            errors.append(
+                f"{relative}:{line_number}: encoded HTML-like tag is visible text"
+            )
+            continue
+        if raw_tag.search(visible):
+            errors.append(
+                f"{relative}:{line_number}: raw HTML tag; use portable GFM instead"
+            )
+
+    if fence is not None:
+        errors.append(f"{relative}: unclosed Markdown code fence")
+
+
 def check_tar(errors: list[str]) -> None:
     if not VENDOR_ARCHIVE.is_file():
         return
@@ -1272,6 +1313,7 @@ def main() -> int:
         check_sensitive_text(path, text, errors)
         if path.suffix.lower() == ".md":
             check_local_links(path, text, errors)
+            check_markdown_portability(path, text, errors)
 
     for script in sorted((ROOT / "linux").glob("*.sh")):
         head = script.read_text(encoding="utf-8").splitlines()[:4]

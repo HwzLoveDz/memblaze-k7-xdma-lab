@@ -55,10 +55,7 @@ SanDisk 做了 Ubuntu 24.04.5 Persistent Live U 盘，其中 64 GiB 作为
 bitstream 由本地构建生成，不放进 Git。完整数字和两份精简证据见
 [实测结果](docs/VALIDATED_RESULTS.zh-CN.md)。
 
-<p align="center">
-  <img src="docs/images/xdma-debug-session.jpg" width="900"
-       alt="原生 Ubuntu 下进行 XDMA DDR3 校验">
-</p>
+![原生 Ubuntu 下进行 XDMA DDR3 校验](docs/images/xdma-debug-session.jpg)
 
 ## 硬件链路
 

@@ -99,7 +99,7 @@
     "status": "documented-and-validated",
     "wiring_figure": {
       "path": "docs/images/wiring-overview.svg",
-      "sha256": "7a0643052e83098b17172a14945809fe1b5c1c50e303f09e719d8e8e86efa6e8"
+      "sha256": "90608ce481d447abdcf43b5ef8ae26b4dca5c6cd63622f4e90e90678b177a127"
     },
     "photos": {
       "parts": {

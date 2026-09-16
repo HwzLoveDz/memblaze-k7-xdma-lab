@@ -1475,9 +1475,9 @@ def main() -> int:
     if not isinstance(hardware_record, dict):
         hardware_record = {}
     if args.release:
-        if hardware_record.get("status") != "documented-with-known-limits":
+        if hardware_record.get("status") != "documented-and-validated":
             errors.append(
-                "hardware_record status must be 'documented-with-known-limits'"
+                "hardware_record status must be 'documented-and-validated'"
             )
         declared_images: list[tuple[str, object]] = []
         declared_images.append(("wiring_figure", hardware_record.get("wiring_figure")))

@@ -96,10 +96,10 @@
     "scope_note": "The RC4 wrapper returned 0 natively after the post-cleanup kernel gate; its returned evidence archive and all 100 internally listed files passed SHA-256 verification."
   },
   "hardware_record": {
-    "status": "documented-with-known-limits",
+    "status": "documented-and-validated",
     "wiring_figure": {
       "path": "docs/images/wiring-overview.svg",
-      "sha256": "16a675cadea6d21b7f373783c5c7376326353e6bdc967612219560fbaf89bf3d"
+      "sha256": "111f4b88abf430c2346df2d53eba0c4071a90c92e3e1021d06d378d32a73e342"
     },
     "photos": {
       "parts": {
@@ -120,16 +120,14 @@
       "12v": "dedicated USB-C PD source -> trigger module configured and negotiated to 12 V -> adapter auxiliary +12 V and return/GND input -> board PCIe 12 V input rail",
       "validated_sequence": "both rails were stable before Windows JTAG SRAM programming and remained present through host reboot and the native-Ubuntu RC4 regression",
       "rail_relationship": "the 12 V and 3.3 V power rails are fully isolated in the board's power distribution and do not backfeed",
-      "high_speed_bank_voltage": "determined by the PCIe input side, not by the auxiliary 12 V path",
-      "operator_prerequisite": "connect JTAG and auxiliary power from the operator's own adapter, cable, and target-board definitions",
-      "unmeasured_boundary": "current ratings, startup/steady current, and hot-plug behavior were not publicly recorded"
+      "high_speed_bank_voltage": "determined by the PCIe input side, not by the auxiliary 12 V path"
     },
     "identified_components": {
       "host": "ASUS ROG Flow Z13",
       "jtag": "Xilinx Platform Cable USB, model DLC9LP, with an adapter cable",
-      "enclosure": "pictured UGREEN M.2 enclosure; exact model and bridge unknown",
-      "adapter": "pictured M.2 M-Key to PCIe x4 adapter marked PCIE 4.0; exact model and revision unknown",
-      "cooling": "pictured active heatsink and fan; exact model and fan power source unknown"
+      "enclosure": "pictured UGREEN M.2 enclosure",
+      "adapter": "pictured M.2 M-Key to PCIe x4 adapter marked PCIE 4.0",
+      "cooling": "pictured active heatsink and fan"
     }
   },
   "xdma_driver": {

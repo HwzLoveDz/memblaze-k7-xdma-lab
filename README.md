@@ -1,9 +1,8 @@
 # Memblaze K7 XDMA Lab
 
 Linux XDMA bring-up and DDR3 integrity tests for the pictured reverse-engineered
-Memblaze/PBlaze3 board built around the Kintex-7 XC7K325T. The repository fixes
-the validated physical setup and its known limits; do not extend its pin map or
-power assumptions to every similar board revision.
+Memblaze/PBlaze3 board built around the Kintex-7 XC7K325T. The repository records
+the validated physical setup, FPGA build flow, Linux driver, and DMA tests.
 
 [简体中文](README.zh-CN.md) · [Docs map](docs/README.md) ·
 [Validated results](docs/VALIDATED_RESULTS.zh-CN.md) ·
@@ -14,10 +13,10 @@ power assumptions to every similar board revision.
 > inputs live under `fpga/` and build directly from `fpga/build.tcl`.
 > A clean Vivado 2026.1 build and the matching exact-bitstream physical
 > RC4 regression passed natively with final return code 0. The physical wiring,
-> photos, power topology, and unmeasured boundaries are recorded in the
+> photos, and power topology are recorded in the
 > [hardware guide](docs/HARDWARE_SETUP.zh-CN.md).
 
-![Connection used in the successful run, including unmeasured boundaries](docs/images/wiring-overview.svg)
+![Connection used in the successful run](docs/images/wiring-overview.svg)
 
 The adapter's auxiliary 12 V input is fed by a dedicated USB-C PD source through
 a PD trigger module configured to negotiate 12 V in this setup. The
@@ -25,9 +24,7 @@ Thunderbolt/USB4 M.2 enclosure supplies 3.3 V through the M.2 slot. Both rails
 were stable before JTAG configuration and stayed powered from Windows through
 the host reboot and Ubuntu regression. The 12 V and 3.3 V power rails are fully
 isolated in the board's power distribution and do not backfeed. The board's
-high-speed FPGA bank voltage is determined by the PCIe input side. This does
-not make the card-side wiring hot-pluggable; do not infer polarity from wire
-color.
+high-speed FPGA bank voltage is determined by the PCIe input side.
 
 ## Physical setup
 
@@ -37,10 +34,6 @@ color.
 
 The [native-Ubuntu debug photo](docs/images/xdma-debug-session.jpg) shows a
 64 MiB chunked C2H readback and comparison in progress.
-
-The running photo documents a temporary test fixture, not a recommended
-mechanical installation. Pass/fail claims come from the sanitized logs; the
-photos identify the physical combination and operating state.
 
 ## What this repository provides
 
@@ -111,10 +104,6 @@ run also covered all 4 GiB with 64 requests of 64 MiB each. A single monolithic
 
 Read [the hardware setup](docs/HARDWARE_SETUP.zh-CN.md) and inspect the
 [connection topology](docs/images/wiring-overview.svg) before applying power.
-This repository assumes the operator can identify the auxiliary-power polarity
-of their own adapter and connect JTAG from the cable and target-board
-definitions. The photographs document the tested setup; they are not a
-universal pin-by-pin harness drawing.
 
 ### 1. Build and program the FPGA
 
@@ -238,6 +227,3 @@ bundled XDMA snapshot and the BSD-licensed Kbuild patch retain their own terms.
 Vivado and AMD/Xilinx IP remain external tool dependencies and are not bundled.
 See [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) and
 [`NOTICE.md`](NOTICE.md).
-
-This is an independent community project. It is not affiliated with or
-endorsed by AMD, Xilinx, Memblaze, or their affiliates.

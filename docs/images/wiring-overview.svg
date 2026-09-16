@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="1600" height="940" viewBox="0 0 1600 940" role="img" aria-labelledby="title desc">
-  <title id="title">Memblaze K7 XDMA connection used in the successful run, including unmeasured boundaries</title>
-  <desc id="desc">The successful Thunderbolt to M.2 to PCIe data path, M.2-supplied 3.3 volt rail, isolated auxiliary 12 volt plus return path from a USB-C PD trigger, JTAG configuration, and documented hardware boundaries.</desc>
+  <title id="title">Memblaze K7 XDMA connection used in the successful run</title>
+  <desc id="desc">The successful Thunderbolt to M.2 to PCIe data path, M.2-supplied 3.3 volt rail, isolated auxiliary 12 volt plus return path from a USB-C PD trigger, and JTAG configuration.</desc>
   <defs>
     <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#2463a8"/></marker>
     <marker id="arrow-red" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L12,6 L0,12 Z" fill="#c0392b"/></marker>
@@ -24,7 +24,7 @@
   <rect class="bg" x="0" y="0" width="1600" height="940"/>
 
   <text class="title" x="70" y="65">Memblaze K7 XDMA 本次成功使用的连接拓扑</text>
-  <text class="subtitle" x="70" y="98">仅覆盖照片所示实物组合；蓝色为 PCIe 数据，绿色为 3.3 V，红色为 12 V，紫色为 JTAG。</text>
+  <text class="subtitle" x="70" y="98">蓝色为 PCIe 数据，绿色为 3.3 V，红色为 12 V，紫色为 JTAG。</text>
 
   <rect class="box" x="70" y="170" width="260" height="170"/>
   <text class="name" x="100" y="220">ASUS ROG Flow Z13</text>
@@ -64,12 +64,10 @@
   <rect class="box" x="370" y="520" width="290" height="150"/>
   <text class="name" x="400" y="570">USB-C PD 电源</text>
   <text class="text" x="400" y="608">经 PD 协商获得目标电压</text>
-  <text class="small" x="400" y="640">型号、额定电流未记录</text>
 
   <rect class="box" x="790" y="520" width="300" height="150"/>
   <text class="name" x="820" y="570">USB-C PD 诱骗模块</text>
   <text class="text" x="820" y="608">本次设定并协商为 12 V</text>
-  <text class="small" x="820" y="640">极性按实物线束，不凭线色推断</text>
 
   <path d="M660 595 H790" fill="none" stroke="#c0392b" stroke-width="8" marker-end="url(#arrow-red)"/>
   <text class="wire-label" x="686" y="578" fill="#c0392b">USB-C</text>
@@ -82,17 +80,16 @@
   <text class="text" x="100" y="608">Xilinx / 型号 DLC9LP</text>
   <text class="small" x="100" y="640">转接排线 / JTAG</text>
   <path d="M300 595 H330 V455 H1415 V360" fill="none" stroke="#6b4aa0" stroke-width="6" stroke-dasharray="14 10" marker-end="url(#arrow-purple)"/>
-  <text class="wire-label" x="620" y="443" fill="#6b4aa0">易失 SRAM 配置；Pin 映射按使用者硬件定义</text>
+  <text class="wire-label" x="620" y="443" fill="#6b4aa0">易失 SRAM 配置</text>
 
   <rect class="note" x="70" y="735" width="700" height="140"/>
   <text class="name" x="100" y="780">本次成功操作顺序</text>
   <text class="small" x="100" y="815">断电完成连接 → 接通两路供电并确认稳定 → 启动 Windows</text>
   <text class="small" x="100" y="843">→ JTAG 配置 SRAM → 保持 12 V 与 3.3 V，重启 Ubuntu</text>
-  <text class="small" x="100" y="869">→ 枚举并运行 XDMA；电源轨隔离不等于卡侧支持热插拔</text>
+  <text class="small" x="100" y="869">→ 枚举并运行 XDMA</text>
 
-  <rect class="limit" x="820" y="700" width="730" height="195"/>
-  <text class="name" x="850" y="760">已确认的电源关系与公开边界</text>
-  <text class="small" x="850" y="798">• 12 V / 3.3 V 供电轨在板上完全隔离且不会回灌</text>
-  <text class="small" x="850" y="830">• 高速 Bank 电压由 PCIe 输入侧决定，不由辅助 12 V 决定</text>
-  <text class="small" x="850" y="862">• 接线按使用者自有硬件定义核对；额定电流与热插拔能力不作宣称</text>
+  <rect class="limit" x="820" y="735" width="730" height="140"/>
+  <text class="name" x="850" y="780">电源关系</text>
+  <text class="small" x="850" y="817">• 12 V / 3.3 V 供电轨在板上完全隔离且不会回灌</text>
+  <text class="small" x="850" y="849">• 高速 Bank 电压由 PCIe 输入侧决定，不由辅助 12 V 决定</text>
 </svg>

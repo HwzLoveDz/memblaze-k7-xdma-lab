@@ -1,8 +1,8 @@
 # Memblaze K7 XDMA Lab
 
 这是一个面向照片所示 Memblaze/PBlaze3 XC7K325T 主板的 Linux XDMA 上手与
-DDR3 数据一致性测试项目。仓库记录了本次实测组合和连接拓扑；不能把 pin map
-或供电方式外推到所有同系列板卡。
+DDR3 数据一致性测试项目。仓库记录了本次实测组合、连接拓扑、FPGA 构建流、
+Linux 驱动和 DMA 测试。
 
 [English](README.md) · [文档地图](docs/README.md) ·
 [实测结果](docs/VALIDATED_RESULTS.zh-CN.md) ·
@@ -11,17 +11,16 @@ DDR3 数据一致性测试项目。仓库记录了本次实测组合和连接拓
 
 > **当前版本：** `v0.1.0-lab`。完整 FPGA 构建输入位于 `fpga/`，
 > 入口为 `fpga/build.tcl`。Vivado 2026.1 干净构建和同一 bitstream 的
-> RC4 精确映像实机回归均已通过，最终原生返回码为 0。供电拓扑、实物照片和
-> 未测边界已写入[硬件连接](docs/HARDWARE_SETUP.zh-CN.md)。
+> RC4 精确映像实机回归均已通过，最终原生返回码为 0。供电拓扑和实物照片
+> 已写入[硬件连接](docs/HARDWARE_SETUP.zh-CN.md)。
 
-![本次成功使用的连接拓扑，包含未测边界](docs/images/wiring-overview.svg)
+![本次成功使用的连接拓扑](docs/images/wiring-overview.svg)
 
 12 V 由独立 USB-C PD 电源经本次设定为 12 V 的诱骗模块送入 M.2↔PCIe
 转接板辅助输入；3.3 V 由雷电/USB4 M.2 盒经 M.2 插槽提供。两路在 JTAG
 配置前均已稳定，并从 Windows、主机重启到 Ubuntu 测试全程保持供电。12 V
 与 3.3 V 两条供电轨在板上供电分配中完全隔离且不会回灌；板上高速 Bank 的
-电压由 PCIe 输入侧决定。电源轨隔离不代表卡侧接口支持热插拔，仍不能仅凭
-线色判断极性。
+电压由 PCIe 输入侧决定。
 
 ## 实物与运行状态
 
@@ -31,9 +30,6 @@ DDR3 数据一致性测试项目。仓库记录了本次实测组合和连接拓
 
 [原生 Ubuntu 调试照片](docs/images/xdma-debug-session.jpg)记录了 64 MiB 分块
 C2H 回读和比较过程。
-
-运行照中的临时支撑和线缆布置只记录本次实验，不是推荐的长期结构。最终测试
-结论来自仓库内的脱敏日志，照片只用于固定实物组合和现场状态。
 
 ## 仓库包含什么
 
@@ -96,9 +92,7 @@ bitstream 本体继续保留在 Git 之外，相同哈希已贯穿干净构建�
 ## 上手顺序
 
 先阅读[硬件连接与上电边界](docs/HARDWARE_SETUP.zh-CN.md)并核对
-[连接拓扑](docs/images/wiring-overview.svg)。本仓库默认使用者具备 FPGA 硬件
-基础，能够按自己的转接板、线束和目标板定义确认辅助供电极性及 JTAG 接线。
-照片用于记录实测组合，不作为通用逐针线束图。
+[连接拓扑](docs/images/wiring-overview.svg)。
 
 ### 1. 构建并配置 FPGA
 
@@ -213,6 +207,3 @@ Ubuntu 可以从固定源码现场构建驱动，并通过 sysfs、`dmesg` 和
 BSD Kbuild 补丁保留各自许可。Vivado 和 AMD/Xilinx IP 是外部工具依赖，
 不随仓库分发。详见 [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md)
 和 [`NOTICE.md`](NOTICE.md)。
-
-这是独立社区项目，与 AMD、Xilinx、Memblaze 及其关联公司没有隶属或
-背书关系。

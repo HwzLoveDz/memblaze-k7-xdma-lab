@@ -5,14 +5,12 @@ sanitized photographs:
 
 | File | Purpose |
 |---|---|
-| `wiring-overview.svg` | Data, 3.3 V, 12 V, and JTAG topology; known unknowns are shown in the figure |
-| `hardware-parts-overview.jpg` | Powered-off overview of the physical parts used; items are laid out, not wired |
+| `wiring-overview.svg` | Data, 3.3 V, 12 V, and JTAG topology |
+| `hardware-parts-overview.jpg` | Powered-off overview of the physical parts used |
 | `xdma-debug-session.jpg` | Native-Ubuntu 64 MiB chunked C2H readback and comparison in progress |
 | `hardware-running.jpg` | Powered temporary test fixture; background device identifiers are redacted |
 
-The JPEG files were re-encoded without EXIF metadata. They identify the tested
-physical combination and operating state; pass/fail claims remain grounded in
-the sanitized text evidence under `evidence/`.
+The JPEG files were re-encoded without EXIF metadata.
 
 The wiring figure records the user-confirmed topology:
 
@@ -25,9 +23,4 @@ The wiring figure records the user-confirmed topology:
 
 The 12 V and 3.3 V power rails are confirmed fully isolated in the board's
 power distribution with no backfeed, and the board's high-speed FPGA bank
-voltage is determined by the PCIe input side. The figure deliberately does not
-claim current limits or hot-plug capability. The repository assumes that the
-operator can connect auxiliary power and JTAG from their own adapter, cable,
-and target-board definitions. Those limits and prerequisites are described in
-`docs/HARDWARE_SETUP.zh-CN.md`; the diagram records this run rather than a
-universal harness.
+voltage is determined by the PCIe input side.

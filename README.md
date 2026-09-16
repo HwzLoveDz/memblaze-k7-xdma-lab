@@ -111,10 +111,10 @@ run also covered all 4 GiB with 64 requests of 64 MiB each. A single monolithic
 
 Read [the hardware setup](docs/HARDWARE_SETUP.zh-CN.md) and inspect the
 [connection topology](docs/images/wiring-overview.svg) before applying power.
-Do not infer 12 V polarity or JTAG direction from connector shape or wire
-color. The public repository does not yet contain a verified
-Pin 1/Vref/TCK/TMS/TDI/TDO table. Items explicitly marked as unmeasured must be
-checked on the reproducer's own hardware.
+This repository assumes the operator can identify the auxiliary-power polarity
+of their own adapter and connect JTAG from the cable and target-board
+definitions. The photographs document the tested setup; they are not a
+universal pin-by-pin harness drawing.
 
 ### 1. Build and program the FPGA
 

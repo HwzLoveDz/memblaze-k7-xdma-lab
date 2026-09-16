@@ -96,10 +96,9 @@ bitstream 本体继续保留在 Git 之外，相同哈希已贯穿干净构建�
 ## 上手顺序
 
 先阅读[硬件连接与上电边界](docs/HARDWARE_SETUP.zh-CN.md)并核对
-[连接拓扑](docs/images/wiring-overview.svg)。不能根据连接器外形或线色猜测
-12 V 极性、电源边界或 JTAG 排线方向；本仓库尚无经过核验的 Pin 1、Vref、
-TCK、TMS、TDI、TDO 逐针表。仓库明确标出的“未测”内容需要复刻者在自己的
-实物上核对。
+[连接拓扑](docs/images/wiring-overview.svg)。本仓库默认使用者具备 FPGA 硬件
+基础，能够按自己的转接板、线束和目标板定义确认辅助供电极性及 JTAG 接线。
+照片用于记录实测组合，不作为通用逐针线束图。
 
 ### 1. 构建并配置 FPGA
 

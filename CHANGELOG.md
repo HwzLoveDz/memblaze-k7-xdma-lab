@@ -28,8 +28,8 @@ All notable changes to this project will be documented here.
 - The exact dual-source power topology and the successful keep-powered
   Windows-to-Ubuntu sequence. The 12 V and 3.3 V rails are recorded as fully
   isolated in the board's power distribution with no backfeed, and the
-  high-speed FPGA bank voltage as determined by the PCIe input side; remaining
-  connector, current, and pin-table boundaries are
+  high-speed FPGA bank voltage as determined by the PCIe input side. Remaining
+  current and hot-plug boundaries, plus operator wiring prerequisites, are
   stated explicitly.
 
 ### Fixed
@@ -62,7 +62,7 @@ All notable changes to this project will be documented here.
   not claimed as a peak physical-link characterization.
 - A single monolithic 1 GiB DMA request was not validated; the public flow uses
   requests no larger than 64 MiB.
-- The exact enclosure bridge, adapter revision, auxiliary connector pinout,
-  PD/line current ratings, hot-plug behavior, and public JTAG pin table remain
-  unknown; the release only claims the pictured and physically tested
-  combination.
+- The exact enclosure bridge, adapter revision, PD/line current ratings, and
+  hot-plug behavior remain unknown; the release only claims the pictured and
+  physically tested combination. JTAG and auxiliary-power pin-level adaptation
+  remain operator prerequisites rather than repository deliverables.

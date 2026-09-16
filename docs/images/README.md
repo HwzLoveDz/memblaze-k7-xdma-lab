@@ -26,8 +26,8 @@ The wiring figure records the user-confirmed topology:
 The 12 V and 3.3 V power rails are confirmed fully isolated in the board's
 power distribution with no backfeed, and the board's high-speed FPGA bank
 voltage is determined by the PCIe input side. The figure deliberately does not
-claim the auxiliary connector pinout, current limits, hot-plug capability, or
-a public JTAG pin table. Those
-limits are described in `docs/HARDWARE_SETUP.zh-CN.md`; a diagram is not a
-substitute for powered-off polarity and rail-routing checks on another adapter
-revision.
+claim current limits or hot-plug capability. The repository assumes that the
+operator can connect auxiliary power and JTAG from their own adapter, cable,
+and target-board definitions. Those limits and prerequisites are described in
+`docs/HARDWARE_SETUP.zh-CN.md`; the diagram records this run rather than a
+universal harness.

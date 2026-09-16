@@ -82,7 +82,7 @@
   <text class="text" x="100" y="608">Xilinx / 型号 DLC9LP</text>
   <text class="small" x="100" y="640">转接排线 / JTAG</text>
   <path d="M300 595 H330 V455 H1415 V360" fill="none" stroke="#6b4aa0" stroke-width="6" stroke-dasharray="14 10" marker-end="url(#arrow-purple)"/>
-  <text class="wire-label" x="620" y="443" fill="#6b4aa0">易失 SRAM 配置；Pin 映射另行核对</text>
+  <text class="wire-label" x="620" y="443" fill="#6b4aa0">易失 SRAM 配置；Pin 映射按使用者硬件定义</text>
 
   <rect class="note" x="70" y="735" width="700" height="140"/>
   <text class="name" x="100" y="780">本次成功操作顺序</text>
@@ -94,5 +94,5 @@
   <text class="name" x="850" y="760">已确认的电源关系与公开边界</text>
   <text class="small" x="850" y="798">• 12 V / 3.3 V 供电轨在板上完全隔离且不会回灌</text>
   <text class="small" x="850" y="830">• 高速 Bank 电压由 PCIe 输入侧决定，不由辅助 12 V 决定</text>
-  <text class="small" x="850" y="862">• 接口逐针 / 极性、额定电流和 JTAG 逐针表未公开；不宣称热插拔</text>
+  <text class="small" x="850" y="862">• 接线按使用者自有硬件定义核对；额定电流与热插拔能力不作宣称</text>
 </svg>

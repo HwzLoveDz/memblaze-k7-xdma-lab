@@ -2,8 +2,8 @@
 
 I had a Memblaze/PBlaze3 controller board whose storage daughterboard was
 missing. The board still had a Kintex-7 `XC7K325T` and 4 GiB of DDR3, so I
-traced the useful hardware, rebuilt the FPGA design, and turned it into an XDMA
-card that works through Thunderbolt 4 on an ordinary x86 host.
+traced the useful hardware, rebuilt the FPGA design, and ran XDMA through both
+a Thunderbolt 4 adapter and a native PCIe slot.
 
 The repository now contains the complete Vivado 2026.1 source flow, the pinned
 Linux XDMA driver, and the scripts used for the physical test. The board builds
@@ -17,7 +17,7 @@ full 4 GiB DDR3 write/read comparison.
 [Full regression](docs/EXACT_IMAGE_REGRESSION.zh-CN.md) ·
 [Troubleshooting](docs/TROUBLESHOOTING.zh-CN.md)
 
-![Measured connection topology](docs/images/wiring-overview.svg)
+![Measured Thunderbolt connection topology](docs/images/wiring-overview.svg)
 
 ## Why the DMA side uses native Linux
 
@@ -57,20 +57,25 @@ experiment. An existing native Linux installation makes this step unnecessary.
 | DMA | Two H2C and two C2H engines; basic and concurrent dual-channel comparisons passed |
 | DDR3 | Five high-address sentinels and 64 × 64 MiB full-capacity comparison passed |
 
+On an MS-A2 native PCIe slot, the link trained at Gen2 ×8. The same full-4-GiB
+chunked test reached 1432 MiB/s H2C and 1108 MiB/s C2H with data comparison
+and cleanup passing. See the [measured results](docs/VALIDATED_RESULTS.zh-CN.md).
+
 The clean-build bitstream and the tested image share SHA-256
 `287f0ff1e9a0bef58842d1769e782fe06ed16cf3019d8e65477ca7a688f5b1c5`.
 The bitstream itself is generated locally and is not committed. Detailed
-numbers and the two concise evidence records are in
+numbers and concise evidence records are in
 [Validated results](docs/VALIDATED_RESULTS.zh-CN.md).
 
 ![XDMA DDR3 validation running in native Ubuntu](docs/images/xdma-debug-session.jpg)
 
 ## Hardware path
 
-The tested setup used an ASUS ROG Flow Z13, a UGREEN Thunderbolt/USB4 M.2
-enclosure, and an M.2 M-Key to PCIe x4 adapter. The M.2 slot supplies the PCIe
-path and 3.3 V. A separate USB-C PD source and trigger module supply 12 V to the
-adapter. JTAG is connected with a Xilinx Platform Cable USB DLC9LP.
+The original Thunderbolt setup used an ASUS ROG Flow Z13, a UGREEN
+Thunderbolt/USB4 M.2 enclosure, and an M.2 M-Key to PCIe x4 adapter. The M.2
+slot supplies the PCIe path and 3.3 V. A separate USB-C PD source and trigger
+module supply 12 V to the adapter. JTAG is connected with a Xilinx Platform
+Cable USB DLC9LP.
 
 The board stays powered while the host reboots from Windows, where Vivado
 programs FPGA SRAM, into native Ubuntu, where PCIe enumeration and DMA are

@@ -2,7 +2,8 @@
 
 我手里这块 Memblaze/PBlaze3 主板的存储子板已经不在了，但板上还有一颗
 Kintex-7 `XC7K325T` 和 4 GiB DDR3。我从实物测量开始重新整理硬件，做了一套
-可从源码构建的 FPGA 工程，最后把它变成了一张可以通过雷电 4 使用的 XDMA 卡。
+可从源码构建的 FPGA 工程，让它在雷电 4 转接链路和原生 PCIe 插槽上都跑通了
+XDMA。
 
 仓库里已经包含 Vivado 2026.1 的完整构建输入、固定版本的 Linux XDMA 驱动和
 实机测试脚本。现在它可以从干净 clone 生成 bitstream，通过 JTAG 配置 SRAM，
@@ -15,7 +16,7 @@ Kintex-7 `XC7K325T` 和 4 GiB DDR3。我从实物测量开始重新整理硬件�
 [完整回归](docs/EXACT_IMAGE_REGRESSION.zh-CN.md) ·
 [故障排查](docs/TROUBLESHOOTING.zh-CN.md)
 
-![本次实测连接拓扑](docs/images/wiring-overview.svg)
+![雷电链路实测连接拓扑](docs/images/wiring-overview.svg)
 
 ## 为什么 DMA 放在原生 Linux
 
@@ -50,22 +51,27 @@ SanDisk 做了 Ubuntu 24.04.5 Persistent Live U 盘，其中 64 GiB 作为
 | DMA | 两组 H2C/C2H 引擎，基础往返和双通道并发比较通过 |
 | DDR3 | 五个高地址哨兵和 64 × 64 MiB 全容量比较通过 |
 
+后来换到 MS-A2 原生 PCIe 插槽，链路达到 Gen2 ×8；完整 4 GiB 分块传输实测
+H2C 1432 MiB/s、C2H 1108 MiB/s，同样通过数据比较和清理。
+
 干净构建和实机测试使用的 bitstream SHA-256 都是
 `287f0ff1e9a0bef58842d1769e782fe06ed16cf3019d8e65477ca7a688f5b1c5`。
-bitstream 由本地构建生成，不放进 Git。完整数字和两份精简证据见
+bitstream 由本地构建生成，不放进 Git。完整数字和精简证据见
 [实测结果](docs/VALIDATED_RESULTS.zh-CN.md)。
 
 ![原生 Ubuntu 下进行 XDMA DDR3 校验](docs/images/xdma-debug-session.jpg)
 
 ## 硬件链路
 
-这次使用 ASUS ROG Flow Z13、UGREEN 雷电/USB4 M.2 外接盒和 M.2 M-Key 转
-PCIe ×4 转接板。M.2 插槽承担 PCIe 链路和 3.3 V 供电，独立 USB-C PD 电源
-通过诱骗模块向转接板提供 12 V。JTAG 使用 Xilinx Platform Cable USB DLC9LP。
+最初的雷电测试使用 ASUS ROG Flow Z13、UGREEN 雷电/USB4 M.2 外接盒和
+M.2 M-Key 转 PCIe ×4 转接板。M.2 插槽承担 PCIe 链路和 3.3 V 供电，独立
+USB-C PD 电源通过诱骗模块向转接板提供 12 V。JTAG 使用 Xilinx Platform
+Cable USB DLC9LP。
 
 Windows 下用 Vivado 配置 FPGA SRAM 后，板卡保持供电，主机重启进入原生
 Ubuntu，再完成 PCIe 枚举和 DMA 测试。实物照片、器材和连接细节都在
 [硬件连接](docs/HARDWARE_SETUP.zh-CN.md)。
+之后的 MS-A2 原生 PCIe 复测见[实测结果](docs/VALIDATED_RESULTS.zh-CN.md)。
 
 FPGA 内部由 XDMA 提供两组 H2C 和两组 C2H 通道，AXI Memory Mapped 主口经
 AXI Interconnect 和 MIG 访问 4 GiB DDR3。设计参数和地址空间跟源码放在

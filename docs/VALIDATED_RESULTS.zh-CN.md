@@ -95,3 +95,26 @@ C2H1=0x1fc10106
 ASMedia/Thunderbolt 字段中仍出现 2.5 GT/s ×1。两组信息并不自洽，我把原始
 读数都保留了。链路带宽、Windows DMA、自动配置和长期稳定性实验统一列在
 [`NEXT_EXPERIMENTS.zh-CN.md`](NEXT_EXPERIMENTS.zh-CN.md)。
+
+## 换到 MS-A2 原生 PCIe 后
+
+我随后把同一张卡插进 MS-A2 的原生 PCIe 插槽，继续使用 Ubuntu 24.04.5
+Persistent Live U 盘和 `7.0.0-31-generic` 内核。MS-A2 枚举到
+`0000:07:00.0`（`10ee:7024`，Subsystem `10ee:0007`）；endpoint 和上游
+root port 均工作在 **5 GT/s ×8（PCIe Gen2 ×8）**。Secure Boot 保持开启，
+注册 MOK 后，同一份已签名的 XDMA 模块成功加载。
+
+用仓库的 `05_dma_smoke.sh` 和 `07_release_advanced.sh` 复测，基础 DMA、
+双通道并发和完整 4 GiB 的 64 × 64 MiB 写入/回读比较全部通过，测试后
+`CLEANUP_RC=0`。与上面的雷电链路记录相比：
+
+| 同一脚本的用户态传输计时 | Flow Z13 雷电链路 | MS-A2 原生 PCIe | 提升 |
+| --- | ---: | ---: | ---: |
+| 完整 4 GiB H2C | 641.454 MiB/s | 1431.837 MiB/s | 2.23 倍 |
+| 完整 4 GiB C2H | 624.475 MiB/s | 1108.200 MiB/s | 1.77 倍 |
+| 双通道并发 H2C | 770.408 MiB/s | 1791.766 MiB/s | 2.33 倍 |
+| 双通道并发 C2H | 794.334 MiB/s | 1656.165 MiB/s | 2.08 倍 |
+
+这些数字来自脚本的传输墙钟计时，不是整套脚本运行时间或 PCIe 线路峰值。
+本轮的[终端结果摘录](../evidence/native_pcie_msa2_console_summary_sanitized.log)
+保留了链路、Secure Boot、数据比较和清理结果。

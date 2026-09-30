@@ -14,6 +14,7 @@ full 4 GiB DDR3 write/read comparison.
 [Hardware](docs/HARDWARE_SETUP.zh-CN.md) ·
 [FPGA build](fpga/README.md) ·
 [Results](docs/VALIDATED_RESULTS.zh-CN.md) ·
+[FPGA RAM disk](experiments/ramdisk/README.zh-CN.md) ·
 [Full regression](docs/EXACT_IMAGE_REGRESSION.zh-CN.md) ·
 [Troubleshooting](docs/TROUBLESHOOTING.zh-CN.md)
 

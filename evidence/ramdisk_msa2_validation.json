@@ -1,0 +1,48 @@
+{
+  "experiment": "FPGA DDR filesystem via XDMA and NBD",
+  "run_id": "20260930T183644",
+  "host": "MINISFORUM MS-A2",
+  "kernel": "7.0.0-31-generic",
+  "endpoint": "0000:07:00.0",
+  "pcie_link": "5 GT/s x8",
+  "bitstream_sha256": "287f0ff1e9a0bef58842d1769e782fe06ed16cf3019d8e65477ca7a688f5b1c5",
+  "capacity_bytes": 4294967296,
+  "filesystem": "ext4",
+  "nbd_device": "/dev/nbd0",
+  "mount": "/home/ubuntu/FPGA_RAM",
+  "driver_load": {
+    "source": "retrieved USB driver-load.log",
+    "INSMOD_RC": 0,
+    "XDMA_DRIVER": "PASS"
+  },
+  "file_64mib": {
+    "source": "retrieved USB file-demo.json",
+    "bytes": 67108864,
+    "comparison": "generated source data vs direct I/O readback",
+    "FILE_DATA_COMPARE": "PASS",
+    "sha256": "4b83f6af834e4eeaf463c14f8fd33d7a3c8627fdc7782f8f01b01f6581a056b9",
+    "direct_io": true,
+    "write_MiB_s": 836.15,
+    "read_MiB_s": 807.99
+  },
+  "file_256mib": {
+    "source": "user-supplied terminal output",
+    "bytes": 268435456,
+    "write_source": "/dev/urandom",
+    "write_elapsed_seconds": 0.468119,
+    "write_display_MB_s": 573,
+    "read_elapsed_seconds": 0.15727,
+    "read_display_GB_s": 1.7,
+    "direct_io": true,
+    "comparison": "direct I/O readback SHA256 vs prior file SHA256",
+    "READBACK_SHA256": "PASS",
+    "sha256": "a05f05d50d59f7fdc58f6450669eba93d04b02f58f1d9a80ff311716f0553ab8"
+  },
+  "cleanup": {
+    "source": "retrieved USB summary.log and driver-cleanup.log",
+    "RAMDISK_CLEANUP_RC": 0,
+    "CLEANUP_STATUS": "PASS",
+    "CLEANUP_RC": 0,
+    "xdma_driver_and_nodes": "removed"
+  }
+}

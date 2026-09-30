@@ -13,6 +13,7 @@ XDMA。
 [硬件连接](docs/HARDWARE_SETUP.zh-CN.md) ·
 [FPGA 构建](fpga/README.md) ·
 [实测结果](docs/VALIDATED_RESULTS.zh-CN.md) ·
+[FPGA RAM 盘](experiments/ramdisk/README.zh-CN.md) ·
 [完整回归](docs/EXACT_IMAGE_REGRESSION.zh-CN.md) ·
 [故障排查](docs/TROUBLESHOOTING.zh-CN.md)
 

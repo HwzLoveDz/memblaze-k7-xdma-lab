@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "project": "Memblaze K7 XDMA Lab",
+  "project": "Memblaze Kintex-7 Lab",
   "release": "0.1.0-lab",
   "status": "release-ready",
   "publication_blockers": [],

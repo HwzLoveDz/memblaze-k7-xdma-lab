@@ -1,4 +1,4 @@
-# Memblaze K7 XDMA Lab
+# Memblaze Kintex-7 Lab
 
 I had a Memblaze/PBlaze3 controller board whose storage daughterboard was
 missing. The board still had a Kintex-7 `XC7K325T` and 4 GiB of DDR3, so I
@@ -97,7 +97,7 @@ absolute path:
 
 ```powershell
 & 'C:\AMD\Vivado\2026.1\bin\vivado.bat' -mode batch `
-  -source C:/work/memblaze-k7-xdma-lab/fpga/build.tcl `
+  -source C:/work/memblaze-kintex7-lab/fpga/build.tcl `
   -tclargs C:/work/memblaze-build --write-bitstream
 ```
 

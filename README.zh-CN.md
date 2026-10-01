@@ -1,4 +1,4 @@
-# Memblaze K7 XDMA Lab
+# Memblaze Kintex-7 Lab
 
 我手里这块 Memblaze/PBlaze3 主板的存储子板已经不在了，但板上还有一颗
 Kintex-7 `XC7K325T` 和 4 GiB DDR3。我从实物测量开始重新整理硬件，做了一套
@@ -86,7 +86,7 @@ AXI Interconnect 和 MIG 访问 4 GiB DDR3。设计参数和地址空间跟源�
 
 ```powershell
 & 'C:\AMD\Vivado\2026.1\bin\vivado.bat' -mode batch `
-  -source C:/work/memblaze-k7-xdma-lab/fpga/build.tcl `
+  -source C:/work/memblaze-kintex7-lab/fpga/build.tcl `
   -tclargs C:/work/memblaze-build --write-bitstream
 ```
 

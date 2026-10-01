@@ -59,7 +59,7 @@ On Windows, set the repository and build paths from PowerShell, then run
 Vivado:
 
 ```powershell
-$LAB_REPO = (Resolve-Path 'C:\work\memblaze-k7-xdma-lab').Path
+$LAB_REPO = (Resolve-Path 'C:\work\memblaze-kintex7-lab').Path
 $BUILD_DIR = 'C:\work\mb1' # must not already exist
 $VIVADO = "$env:XILINX_VIVADO\bin\vivado.bat"
 
@@ -82,7 +82,7 @@ On Linux, run the same Tcl entry point with Linux paths:
 VIVADO_ROOT="/tools/AMD/Vivado/2026.1"
 source "$VIVADO_ROOT/settings64.sh"
 
-LAB_REPO="$HOME/src/memblaze-k7-xdma-lab"
+LAB_REPO="$HOME/src/memblaze-kintex7-lab"
 BUILD_DIR="$HOME/build/memblaze-k7-xdma"
 
 vivado -mode batch -source "$LAB_REPO/fpga/build.tcl" \
